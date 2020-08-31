@@ -7,6 +7,7 @@ import pandas as pd
 from scipy.io import savemat, loadmat
 import os
 
+from two_zone_model import two_zone_HVAC
 
 #loading the time series data
 coeff = loadmat("./Power-Converters/RL-buildings/ModelCoeff_Krishna.mat")
@@ -59,3 +60,26 @@ inputs_e = inputs['2006-06-01' :'2006-07-31']
 states_e = states['2006-06-01' :'2006-07-31']
 #print(inputs_e)
 #print(states_e)
+
+
+#A = np.array([[0.4670736444788445,0, 0.473590433381762, 0.027560814480025012, 0.02482360723716469, 0, 0],
+#[0, 0.169849447097808, 1.2326345328482877, -1.2018861561221592, -1.4566448096944626, 0.004739745164037462, 0.002503902132835721]])
+A=np.array([[model_params['a_0'],0,model_params['a_1'],model_params['a_2'],model_params['a_3'],model_params['a_4'],model_params['a_5']],
+[0,model_params['b_0'],model_params['b_1'],model_params['b_2'],model_params['b_3'],model_params['b_4'],model_params['b_5']]])
+d = inputs_e.values
+env = two_zone_HVAC(d = d, A=A)
+#env._set_state(states_e.values[0][0],states_e.values[0][1])
+#print(states_e.values[0], env.state)
+Obs, Rew, Done = [], [], []
+s = env.reset()
+Obs.append(s)
+done = False
+for i in range(10**5):
+    if not done:
+        s, r, done, _ = env.step(24)
+        Obs.append(s)
+        Rew.append(r)
+        Done.append(done)
+    else:
+        break
+env.plot(states_e.values, start=0, end=100, plot_original=True, savefig_filename = None)
