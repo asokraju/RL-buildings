@@ -82,4 +82,4 @@ for i in range(10**5):
         Done.append(done)
     else:
         break
-env.plot(states_e.values, start=0, end=100, plot_original=True, savefig_filename = None)
+env.plot(states_e.values, start=0, end=100, plot_original=True, savefig_filename = './Power-Converters/RL-buildings/pred_plot')
