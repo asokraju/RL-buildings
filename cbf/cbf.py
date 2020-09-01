@@ -6,7 +6,7 @@ from cvxopt import solvers
 def CBF(env, T_min, T_max, eta_1 = 0.5, eta_2 = 0.5):
 
 
-    P = matrix(np.diag([1.0, 1e24,1e24]), tc='d')
+    P = matrix(np.diag([0.0, 1e24,1e24]), tc='d')
     q = matrix(np.zeros(3))
 
 
