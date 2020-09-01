@@ -35,7 +35,7 @@ def main(args, reward_result):
     test_steps = env.total_no_of_steps
     test_episodes = 2000
     for _ in range(test_episodes):
-        u = np.random.uniform(-1,1)
+        u = env.action_space.sample()
         for _ in range(test_steps):
             s, _,_,_ = test_env.step(u)
             test_obs.append(s)
@@ -158,7 +158,10 @@ def main(args, reward_result):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='provide arguments for DDPG agent')
     #loading the environment to get it default params
-    env = Buck_Converter_n()
+    path = os.path.dirname(os.path.abspath(__file__)).replace(os.sep, '/')
+    A = np.loadtxt(path+'/data/A.txt', dtype=int)
+    d = np.loadtxt(path+'/data/d.txt', dtype=int)
+    env = two_zone_HVAC(A=A, d=d)
     state_dim = env.observation_space.shape[0]
     action_dim = env.action_space.shape[0]
     action_bound = env.action_space.high
