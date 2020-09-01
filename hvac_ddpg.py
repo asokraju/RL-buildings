@@ -142,12 +142,14 @@ def main(args, reward_result):
     obs_scaled.append(s_scaled)
     obs.append(test_s)   
     actions.append([test_env.action_space.sample()])
-    for _ in range(test_env.total_no_of_steps-args['time_steps']):
+    for _ in range(test_env.total_no_of_steps-args['time_steps']+1):
         S_0 = obs_scaled[-args['time_steps']:]
         test_a = actor.predict(np.reshape(S_0, (1, args['time_steps'], args['state_dim'])))
         test_s, r, terminal, info = test_env.step(test_a[0])
         s2_scaled = np.float32((test_s - mean) * var)
         obs_scaled.append(s2_scaled)
+        if terminal:
+            break
     savefig_filename = args['summary_dir']+'/results/results_plot.png'
     #test_env.plot(savefig_filename=savefig_filename)
     test_env.plot(true_states, plot_original=False, savefig_filename = savefig_filename)
@@ -180,8 +182,8 @@ if __name__ == '__main__':
     #agent params
     parser.add_argument('--buffer_size', help='replay buffer size', type = int, default=1000000)
     parser.add_argument('--max_episodes', help='max number of episodes', type = int, default=2)
-    parser.add_argument('--max_episode_len', help='Number of steps per epsiode', type = int, default=30)#env.total_no_of_steps
-    parser.add_argument('--mini_batch_size', help='sampling batch size',type =int, default=20)
+    parser.add_argument('--max_episode_len', help='Number of steps per epsiode', type = int, default=env.total_no_of_steps)
+    parser.add_argument('--mini_batch_size', help='sampling batch size',type =int, default=3000)
     parser.add_argument('--actor_lr', help='actor network learning rate',type =float, default=0.0001)
     parser.add_argument('--critic_lr', help='critic network learning rate',type =float, default=0.001)
     parser.add_argument('--gamma', help='models the long term returns', type =float, default=0.999)

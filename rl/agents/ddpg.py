@@ -456,7 +456,7 @@ def train_rnn(env, test_env, args, actor, critic, actor_noise, reward_result, sc
         obs_scaled.append(s_scaled)
         obs.append(s)   
         actions.append(np.array(env.action_space.sample()))
-        for j in range(args['max_episode_len']-args['time_steps']-1):
+        for j in range(args['max_episode_len']-args['time_steps']+1):
 
             
             S_0 = obs_scaled[-args['time_steps']: ]
@@ -506,8 +506,9 @@ def train_rnn(env, test_env, args, actor, critic, actor_noise, reward_result, sc
             obs.append(s)
             actions.append(a[0])
             rewards.append(r)
-            print('j+1: {}, max episode len: {}, terminal: {}'.format(j+1,args['max_episode_len'], terminal))
-            if j+1 == args['max_episode_len']:
+            print('j: {}, max episode len: {}, terminal: {}, steps-count: {}'.format(j,args['max_episode_len'], terminal, env.count_steps))
+            #if j+args['time_steps'] == args['max_episode_len']:
+            if terminal:
                 with writer.as_default():
                     tf.summary.scalar("Reward", ep_reward, step = i)
                     tf.summary.scalar("Qmax Value", ep_ave_max_q / float(j), step = i)
@@ -515,7 +516,7 @@ def train_rnn(env, test_env, args, actor, critic, actor_noise, reward_result, sc
                 print('| Reward: {:.4f} | Episode: {:d} | Qmax: {:.4f}'.format((ep_reward), i, (ep_ave_max_q / float(j))))
                 reward_result[i] = ep_reward
                 path = {
-                    "Observation":np.concatenate(obs).reshape((args['max_episode_len']+args['time_steps'],2)), 
+                    "Observation":np.concatenate(obs).reshape((args['max_episode_len']+1,2)), 
                     "Action":np.concatenate(actions), 
                     "Reward":np.asarray(rewards)
                     }
