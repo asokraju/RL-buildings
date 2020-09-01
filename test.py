@@ -80,7 +80,7 @@ Obs.append(s)
 done = False
 for i in range(10**5):
     if not done:
-        s, r, done, _ = env.step([24])
+        s, r, done, _ = env.step([-1.0/3.0])
         Obs.append(s)
         Rew.append(r)
         Done.append(done)
@@ -100,8 +100,10 @@ Obs.append(s)
 done = False
 for i in range(10**5):
     if not done:
+        
         T_set = CBF(env, T_min = 22, T_max = 23, eta_1 = 0.999, eta_2 = .999)
-        s, r, done, _ = env.step([T_set])
+        action  = (T_set - 23)*(2/3) - 1
+        s, r, done, _ = env.step([action])
         Obs.append(s)
         Rew.append(r)
         Done.append(done)
