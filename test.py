@@ -7,16 +7,17 @@ import pandas as pd
 from scipy.io import savemat, loadmat
 import os
 
-from two_zone_model import two_zone_HVAC
+from gym_env.two_zone_model import two_zone_HVAC
+from cbf.cbf import CBF
 
 
 path = os.path.dirname(os.path.abspath(__file__)).replace(os.sep, '/')
 
-coeff = loadmat(path +"/ModelCoeff_Krishna.mat")
-Flowrate = pd.read_csv(path +"/Flowrates.csv", index_col = 0, parse_dates = True)
-Intloads = pd.read_csv(path +"/Internalloads.csv", index_col = 0, parse_dates = True)
-OthVar = pd.read_csv(path +"/OtherVariables.csv", index_col = 0, parse_dates = True)
-Temp = pd.read_csv(path +"/Temperatures.csv", index_col = 0, parse_dates = True)
+coeff = loadmat(path +"/data/ModelCoeff_Krishna.mat")
+Flowrate = pd.read_csv(path +"/data/Flowrates.csv", index_col = 0, parse_dates = True)
+Intloads = pd.read_csv(path +"/data/Internalloads.csv", index_col = 0, parse_dates = True)
+OthVar = pd.read_csv(path +"/data/OtherVariables.csv", index_col = 0, parse_dates = True)
+Temp = pd.read_csv(path +"/data/Temperatures.csv", index_col = 0, parse_dates = True)
 
 
 #extracting the model coeff.
@@ -60,18 +61,15 @@ states.columns = ['T', 'Q']
 #extracting june and july data
 inputs_e = inputs['2006-06-01' :'2006-07-31']
 states_e = states['2006-06-01' :'2006-07-31']
-#print(inputs_e)
-#print(states_e)
 
 
-#A = np.array([[0.4670736444788445,0, 0.473590433381762, 0.027560814480025012, 0.02482360723716469, 0, 0],
-#[0, 0.169849447097808, 1.2326345328482877, -1.2018861561221592, -1.4566448096944626, 0.004739745164037462, 0.002503902132835721]])
+
+#Validation and environment testing
 A=np.array([[model_params['a_0'],0,model_params['a_1'],model_params['a_2'],model_params['a_3'],model_params['a_4'],model_params['a_5']],
 [0,model_params['b_0'],model_params['b_1'],model_params['b_2'],model_params['b_3'],model_params['b_4'],model_params['b_5']]])
 d = inputs_e.values
 env = two_zone_HVAC(d = d, A=A)
-#env._set_state(states_e.values[0][0],states_e.values[0][1])
-#print(states_e.values[0], env.state)
+
 Obs, Rew, Done = [], [], []
 s = env.reset()
 Obs.append(s)
@@ -84,4 +82,28 @@ for i in range(10**5):
         Done.append(done)
     else:
         break
-env.plot(states_e.values, start=0, end=100, plot_original=True, savefig_filename = path+'/pred_plot')
+env.plot(states_e.values, start=0, end=100, plot_original=True, savefig_filename = path+'/results/validation_plot')
+
+#Checking control barrier function based controller
+A = np.array([[0.4670736444788445,0, 0.473590433381762, 0.027560814480025012, 0.02482360723716469, 0, 0],
+      [0, 0.169849447097808, 1.2326345328482877, -1.2018861561221592, -1.4566448096944626, 0.004739745164037462, 0.002503902132835721]])
+d = inputs_e.values
+env = two_zone_HVAC(d = d, A=A)
+#env._set_state(states_e.values[0][0],states_e.values[0][1])
+Obs, Rew, Done = [], [], []
+s = env.reset()
+Obs.append(s)
+done = False
+for i in range(10**5):
+    if not done:
+        T_set = CBF(env, T_min = 22, T_max = 25, eta_1 = 0.5, eta_2 = 0.5)
+        s, r, done, _ = env.step(T_set)
+        Obs.append(s)
+        Rew.append(r)
+        Done.append(done)
+    else:
+        break
+env.plot(states_e.values, plot_original=False, savefig_filename = path+'/results/cbf_plot')
+
+
+
