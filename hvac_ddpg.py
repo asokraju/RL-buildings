@@ -181,9 +181,9 @@ if __name__ == '__main__':
     
     #agent params
     parser.add_argument('--buffer_size', help='replay buffer size', type = int, default=1000000)
-    parser.add_argument('--max_episodes', help='max number of episodes', type = int, default=2)
+    parser.add_argument('--max_episodes', help='max number of episodes', type = int, default=200)
     parser.add_argument('--max_episode_len', help='Number of steps per epsiode', type = int, default=env.total_no_of_steps)
-    parser.add_argument('--mini_batch_size', help='sampling batch size',type =int, default=3000)
+    parser.add_argument('--mini_batch_size', help='sampling batch size',type =int, default=300)
     parser.add_argument('--actor_lr', help='actor network learning rate',type =float, default=0.0001)
     parser.add_argument('--critic_lr', help='critic network learning rate',type =float, default=0.001)
     parser.add_argument('--gamma', help='models the long term returns', type =float, default=0.999)
@@ -198,12 +198,12 @@ if __name__ == '__main__':
 
     #Network parameters
     parser.add_argument('--time_steps', help='Number of time-steps for rnn (LSTM)', type = int, default=6)
-    parser.add_argument('--actor_rnn', help='actor network rnn paramerters', type = int, default=10)
-    parser.add_argument('--actor_l1', help='actor network layer 1 parameters', type = int, default=40)
-    parser.add_argument('--actor_l2', help='actor network layer 2 parameters', type = int, default=30)
-    parser.add_argument('--critic_rnn', help='critic network rnn parameters', type = int, default=10)
-    parser.add_argument('--critic_l1', help='actor network layer 1 parameters', type = int, default=40)
-    parser.add_argument('--critic_l2', help='actor network layer 2 parameters', type = int, default=30)
+    parser.add_argument('--actor_rnn', help='actor network rnn paramerters', type = int, default=20)
+    parser.add_argument('--actor_l1', help='actor network layer 1 parameters', type = int, default=100)
+    parser.add_argument('--actor_l2', help='actor network layer 2 parameters', type = int, default=100)
+    parser.add_argument('--critic_rnn', help='critic network rnn parameters', type = int, default=20)
+    parser.add_argument('--critic_l1', help='actor network layer 1 parameters', type = int, default=100)
+    parser.add_argument('--critic_l2', help='actor network layer 2 parameters', type = int, default=100)
     parser.add_argument('--tau', help='target network learning rate', type = float, default=0.001)
     
     args = vars(parser.parse_args())

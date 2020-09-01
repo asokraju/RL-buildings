@@ -506,7 +506,7 @@ def train_rnn(env, test_env, args, actor, critic, actor_noise, reward_result, sc
             obs.append(s)
             actions.append(a[0])
             rewards.append(r)
-            print('j: {}, max episode len: {}, terminal: {}, steps-count: {}'.format(j,args['max_episode_len'], terminal, env.count_steps))
+            #print('j: {}, max episode len: {}, terminal: {}, steps-count: {}'.format(j,args['max_episode_len'], terminal, env.count_steps))
             #if j+args['time_steps'] == args['max_episode_len']:
             if terminal:
                 with writer.as_default():
