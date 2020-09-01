@@ -9,12 +9,14 @@ import os
 
 from two_zone_model import two_zone_HVAC
 
-#loading the time series data
-coeff = loadmat("./Power-Converters/RL-buildings/ModelCoeff_Krishna.mat")
-Flowrate = pd.read_csv("./Power-Converters/RL-buildings/Flowrates.csv", index_col = 0, parse_dates = True)
-Intloads = pd.read_csv("./Power-Converters/RL-buildings/Internalloads.csv", index_col = 0, parse_dates = True)
-OthVar = pd.read_csv("./Power-Converters/RL-buildings/OtherVariables.csv", index_col = 0, parse_dates = True)
-Temp = pd.read_csv("./Power-Converters/RL-buildings/Temperatures.csv", index_col = 0, parse_dates = True)
+
+path = os.path.dirname(os.path.abspath(__file__)).replace(os.sep, '/')
+
+coeff = loadmat(path +"/ModelCoeff_Krishna.mat")
+Flowrate = pd.read_csv(path +"/Flowrates.csv", index_col = 0, parse_dates = True)
+Intloads = pd.read_csv(path +"/Internalloads.csv", index_col = 0, parse_dates = True)
+OthVar = pd.read_csv(path +"/OtherVariables.csv", index_col = 0, parse_dates = True)
+Temp = pd.read_csv(path +"/Temperatures.csv", index_col = 0, parse_dates = True)
 
 
 #extracting the model coeff.
@@ -33,8 +35,8 @@ model_params = {
     'b_4': temp_2[4][0],
     'b_5': temp_2[5][0],
 }
-for key, value in model_params.items():
-    print(key, value)
+# for key, value in model_params.items():
+#     print(key, value)
 
 #parameters
 T_set = OthVar.iloc[:, 5]
@@ -82,4 +84,4 @@ for i in range(10**5):
         Done.append(done)
     else:
         break
-env.plot(states_e.values, start=0, end=100, plot_original=True, savefig_filename = './Power-Converters/RL-buildings/pred_plot')
+env.plot(states_e.values, start=0, end=100, plot_original=True, savefig_filename = path+'/pred_plot')
