@@ -24,21 +24,23 @@ def main(args, reward_result):
         physical_devices = tf.config.list_physical_devices('GPU') 
         tf.config.experimental.set_memory_growth(physical_devices[0], True)
     path = os.path.dirname(os.path.abspath(__file__)).replace(os.sep, '/')
-    A = np.loadtxt(path+'/data/A.txt', dtype=int)
-    d = np.loadtxt(path+'/data/d.txt', dtype=int)
+    A = np.loadtxt(path+'/data/A.txt')
+    d = np.loadtxt(path+'/data/d.txt')
+    true_states = np.loadtxt(path+'/data/states.txt')
     #initalizing environment
-    test_env = two_zone_HVAC(d = d, A=A)
-    env = two_zone_HVAC(d = d, A=A)
+    test_env = two_zone_HVAC(d = d, A = A)
+    env = two_zone_HVAC(d = d, A = A)
 
     test_s = test_env.reset()
     test_obs=[]
-    test_steps = env.total_no_of_steps
+    test_steps = env.total_no_of_steps-1
     test_episodes = 2000
     for _ in range(test_episodes):
-        u = env.action_space.sample()
         for _ in range(test_steps):
+            u = env.action_space.sample()
             s, _,_,_ = test_env.step(u)
             test_obs.append(s)
+        test_env.reset()
     scaler = Scaler(2)
     scaler.update(np.concatenate(test_obs).reshape((test_steps*test_episodes,env.observation_space.shape[0])))
     var, mean = scaler.get()
@@ -81,42 +83,42 @@ def main(args, reward_result):
 
     #loading the weights
     if args['load_model']:
-        if os.path.isfile(args['summary_dir'] + "/actor_weights.h5"):
+        if os.path.isfile(args['summary_dir'] + "/results/actor_weights.h5"):
             print('loading actor weights')
-            actor.actor_model.load_weights(args['summary_dir'] + "/actor_weights.h5")
-        if os.path.isfile(args['summary_dir'] + "/target_actor_weights.h5"):
+            actor.actor_model.load_weights(args['summary_dir'] + "/results/actor_weights.h5")
+        if os.path.isfile(args['summary_dir'] + "/results/target_actor_weights.h5"):
             print('loading actor target weights')
-            actor.actor_model.load_weights(args['summary_dir'] + "/target_actor_weights.h5")
-        if os.path.isfile(args['summary_dir'] + "/critic_weights.h5"):
+            actor.actor_model.load_weights(args['summary_dir'] + "/results/target_actor_weights.h5")
+        if os.path.isfile(args['summary_dir'] + "/results/critic_weights.h5"):
             print('loading critic weights')
-            critic.critic_model.load_weights(args['summary_dir'] + "/critic_weights.h5")
-        if os.path.isfile(args['summary_dir'] + "/target_critic_weights.h5"):
+            critic.critic_model.load_weights(args['summary_dir'] + "/results/critic_weights.h5")
+        if os.path.isfile(args['summary_dir'] + "/results/target_critic_weights.h5"):
             print('loading critic target weights')
-            critic.critic_model.load_weights(args['summary_dir'] + "/target_critic_weights.h5")
+            critic.critic_model.load_weights(args['summary_dir'] + "/results/target_critic_weights.h5")
 
     replay_buffer = ReplayBuffer(int(args['buffer_size']), int(args['random_seed']))
     actor_noise = OrnsteinUhlenbeckActionNoise(mu=np.zeros(action_dim))
     #reward_result = np.zeros(2500)
     print(actor.actor_model.summary())
     print(critic.critic_model.summary())
-    paths, reward_result = train_rnn(env, test_env, args, actor, critic, actor_noise, reward_result, scaler, replay_buffer)
+    paths, reward_result = train_rnn(env, test_env, args, actor, critic, actor_noise, reward_result, scaler, replay_buffer, true_states)
 
     # Saving the weights
     if args['save_model']:
         actor.actor_model.save_weights(
-            filepath = args['summary_dir'] + "/actor_weights.h5",
+            filepath = args['summary_dir'] + "/results/actor_weights.h5",
             overwrite=True,
             save_format='h5')
         actor.target_actor_model.save_weights(
-            filepath = args['summary_dir'] + "/target_actor_weights.h5",
+            filepath = args['summary_dir'] + "/results/target_actor_weights.h5",
             overwrite=True,
             save_format='h5')
         critic.critic_model.save_weights(
-            filepath = args['summary_dir'] + "/critic_weights.h5",
+            filepath = args['summary_dir'] + "/results/critic_weights.h5",
             overwrite=True,
             save_format='h5')
         critic.target_critic_model.save_weights(
-            filepath = args['summary_dir'] + "/target_critic_weights.h5",
+            filepath = args['summary_dir'] + "/results/target_critic_weights.h5",
             overwrite=True,
             save_format='h5')
 
@@ -133,23 +135,23 @@ def main(args, reward_result):
         s_scaled = np.float32((test_s - mean) * var)
         obs_scaled.append(s_scaled)
         obs.append(test_s)
-        test_s, r, terminal, info = test_env.step(np.array([test_env.action_des], dtype="float32"))
-        actions.append([env.action_des])
+        test_s, r, terminal, info = test_env.step(np.array([test_env.action_space.sample()], dtype="float32"))
+        actions.append([test_env.action_space.sample()])
 
     s_scaled = np.float32((test_s - mean) * var)
     obs_scaled.append(s_scaled)
     obs.append(test_s)   
-    actions.append([env.action_des])
-    for _ in range(2000):
+    actions.append([test_env.action_space.sample()])
+    for _ in range(test_env.total_no_of_steps-args['time_steps']):
         S_0 = obs_scaled[-args['time_steps']:]
         test_a = actor.predict(np.reshape(S_0, (1, args['time_steps'], args['state_dim'])))
         test_s, r, terminal, info = test_env.step(test_a[0])
         s2_scaled = np.float32((test_s - mean) * var)
         obs_scaled.append(s2_scaled)
-    savefig_filename = os.path.join(args['summary_dir'], 'results_plot.png')
-    test_env.plot(savefig_filename=savefig_filename)
-
-    savemat(os.path.join(args['summary_dir'], 'data.mat'),
+    savefig_filename = args['summary_dir']+'/results/results_plot.png'
+    #test_env.plot(savefig_filename=savefig_filename)
+    test_env.plot(true_states, plot_original=False, savefig_filename = savefig_filename)
+    savemat(args['summary_dir'] + '/results/data.mat',
             dict(data=paths, reward=reward_result))
 
     return [paths, reward_result]
@@ -159,8 +161,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='provide arguments for DDPG agent')
     #loading the environment to get it default params
     path = os.path.dirname(os.path.abspath(__file__)).replace(os.sep, '/')
-    A = np.loadtxt(path+'/data/A.txt', dtype=int)
-    d = np.loadtxt(path+'/data/d.txt', dtype=int)
+    A = np.loadtxt(path+'/data/A.txt')
+    d = np.loadtxt(path+'/data/d.txt')
     env = two_zone_HVAC(A=A, d=d)
     state_dim = env.observation_space.shape[0]
     action_dim = env.action_space.shape[0]
@@ -169,17 +171,17 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='provide arguments for DDPG agent')
 
     #general params
-    parser.add_argument('--summary_dir', help='directory for saving and loading model and other data', default='./Power-Converters/kristools/results')
+    parser.add_argument('--summary_dir', help='directory for saving and loading model and other data', default=path)
     parser.add_argument('--use_gpu', help='weather to use gpu or not', type = bool, default=True)
-    parser.add_argument('--save_model', help='Saving model from summary_dir', type = bool, default=False)
+    parser.add_argument('--save_model', help='Saving model from summary_dir', type = bool, default=True)
     parser.add_argument('--load_model', help='Loading model from summary_dir', type = bool, default=False)
     parser.add_argument('--random_seed', help='seeding the random number generator', default=1754)
     
     #agent params
     parser.add_argument('--buffer_size', help='replay buffer size', type = int, default=1000000)
-    parser.add_argument('--max_episodes', help='max number of episodes', type = int, default=500)
-    parser.add_argument('--max_episode_len', help='Number of steps per epsiode', type = int, default=1200)
-    parser.add_argument('--mini_batch_size', help='sampling batch size',type =int, default=200)
+    parser.add_argument('--max_episodes', help='max number of episodes', type = int, default=2)
+    parser.add_argument('--max_episode_len', help='Number of steps per epsiode', type = int, default=30)#env.total_no_of_steps
+    parser.add_argument('--mini_batch_size', help='sampling batch size',type =int, default=20)
     parser.add_argument('--actor_lr', help='actor network learning rate',type =float, default=0.0001)
     parser.add_argument('--critic_lr', help='critic network learning rate',type =float, default=0.001)
     parser.add_argument('--gamma', help='models the long term returns', type =float, default=0.999)

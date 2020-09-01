@@ -424,7 +424,7 @@ class CriticNetwork_rnn(object):
 
 
 ##---------------------------------------------------------------------------------------------------------------
-def train_rnn(env, test_env, args, actor, critic, actor_noise, reward_result, scaler, replay_buffer):
+def train_rnn(env, test_env, args, actor, critic, actor_noise, reward_result, scaler, replay_buffer, true_states):
     writer = tf.summary.create_file_writer(logdir = args['summary_dir'])
     actor.update_target_network()
     critic.update_target_network()
@@ -449,14 +449,14 @@ def train_rnn(env, test_env, args, actor, critic, actor_noise, reward_result, sc
             s_scaled = np.float32((s - mean) * var)
             obs_scaled.append(s_scaled)
             obs.append(s)
-            s, r, terminal, info = env.step(np.array([env.action_des], dtype="float32"))
-            actions.append(np.array([env.action_des]))
+            s, r, terminal, info = env.step(np.array(env.action_space.sample(), dtype="float32"))
+            actions.append(np.array(env.action_space.sample()))
 
         s_scaled = np.float32((s - mean) * var)
         obs_scaled.append(s_scaled)
         obs.append(s)   
-        actions.append(np.array([env.action_des]))
-        for j in range(args['max_episode_len']):
+        actions.append(np.array(env.action_space.sample()))
+        for j in range(args['max_episode_len']-args['time_steps']-1):
 
             
             S_0 = obs_scaled[-args['time_steps']: ]
@@ -506,7 +506,7 @@ def train_rnn(env, test_env, args, actor, critic, actor_noise, reward_result, sc
             obs.append(s)
             actions.append(a[0])
             rewards.append(r)
-
+            print('j+1: {}, max episode len: {}, terminal: {}'.format(j+1,args['max_episode_len'], terminal))
             if j+1 == args['max_episode_len']:
                 with writer.as_default():
                     tf.summary.scalar("Reward", ep_reward, step = i)
@@ -520,7 +520,7 @@ def train_rnn(env, test_env, args, actor, critic, actor_noise, reward_result, sc
                     "Reward":np.asarray(rewards)
                     }
                 paths.append(path)
-                env.plot()
+                #env.plot(true_states, plot_original=False, savefig_filename = path+'/results/cbf_plot')
                 #test_s = test_env.reset()
                 # if i+1 == args['max_episodes']:
                 #     env.plot()

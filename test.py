@@ -69,8 +69,10 @@ A=np.array([[model_params['a_0'],0,model_params['a_1'],model_params['a_2'],model
 [0,model_params['b_0'],model_params['b_1'],model_params['b_2'],model_params['b_3'],model_params['b_4'],model_params['b_5']]])
 d = inputs_e.values
 #Saving the A and d arrays
-np.savetxt(path+'/data/A.txt', A, fmt='%d')
-np.savetxt(path+'/data/d.txt', d, fmt='%d')
+np.savetxt(path+'/data/A.txt', A)
+np.savetxt(path+'/data/d.txt', d)
+np.savetxt(path+'/data/states.txt', states_e.values)
+
 env = two_zone_HVAC(d = d, A=A)
 
 Obs, Rew, Done = [], [], []
