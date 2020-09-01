@@ -94,7 +94,7 @@ class two_zone_HVAC(gym.Env):
     def plot(self, states, start = 0, end = None, plot_original = True, savefig_filename = None):
         data = np.concatenate(self.state_trajectory).reshape((self.count_steps +1,self.observation_space.shape[0]))
         if end is None:
-            end = data.shape[0]
+            end = data.shape[0]-1
         number_of_colors = data.shape[1]
         color = ['r', 'b']
         fig, ax = plt.subplots(nrows=1, ncols=data.shape[1], figsize = (8,4))
