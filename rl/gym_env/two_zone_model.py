@@ -28,7 +28,7 @@ class two_zone_HVAC(gym.Env):
         self.d=d
         
         #The control action is
-        self.action_space = spaces.Box(low=23, high=26, shape=(2,), dtype=np.float32)
+        self.action_space = spaces.Box(low=23, high=26, shape=(1,), dtype=np.float32)
         self.observation_space = spaces.Box(low=np.array([-np.inf, -np.inf]), high=np.array([+np.inf, +np.inf]), shape=None, dtype=np.float32)
         
         self._get_state()
@@ -64,10 +64,10 @@ class two_zone_HVAC(gym.Env):
         return self.state
     
     def step(self, T_set):
-
+        
         T = self.state[0]
         Q = self.state[1]
-        state = np.append([T, Q, T_set], self.d[self.count_steps,1:]).T
+        state = np.append([T, Q, T_set[0]], self.d[self.count_steps,1:]).T
         self.state = np.matmul(self.A, state)
 
         # normalize the rewards
