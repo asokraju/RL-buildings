@@ -8,3 +8,5 @@ This contains basic tools for implementing Reinforcement Learning algorithms and
 - ```test.py ``` extracts the model parameters and 
   - verifes the model ![Verification](results/validation_plot.png)
   - simulates a Control barrier based controller where the objective is to maintain the temperature bewtween (22, 23)![CBF](results/cbf_plot.png)
+  
+#Aim: minimizing the cooling load supplied to the zone.
