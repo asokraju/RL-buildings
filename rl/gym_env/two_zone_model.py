@@ -98,7 +98,7 @@ class two_zone_HVAC(gym.Env):
             end = data.shape[0]-1
         number_of_colors = data.shape[1]
         color = ['r', 'b']
-        fig, ax = plt.subplots(nrows=1, ncols=data.shape[1], figsize = (8,4))
+        fig, ax = plt.subplots(nrows=1, ncols=data.shape[1]+1, figsize = (12,4))
         time = np.array(range(data.shape[0]), dtype=np.float32)
         for i in range(data.shape[1]):
             ax[i].plot(time[start:end], data[:, i][start:end],  c = 'b', label='predicted')
@@ -106,6 +106,7 @@ class two_zone_HVAC(gym.Env):
                 ax[i].plot(time[start:end], states[:, i][start:end],c = 'r', marker = '.', label='actual')
             #ax[i].set_ylim(0, des[i]+50)
             ax[i].legend()
+        ax[i+1].plot(time[start:end], self.action_trajectory[start:end],  c = 'b', label='Input (T_set)')
         ax[0].set_title('Temperature', fontsize=20)
         ax[0].set_xlabel('Time', fontsize=20)
         ax[1].set_title('Cooling load', fontsize=20)
