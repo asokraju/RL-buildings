@@ -670,7 +670,7 @@ def train_multi_agent(env, test_env, args, actors, critics, reward_result, scale
                     "Reward":np.asarray(rewards)
                     }
                 paths.append(path)
-                #env.plot()
+                env.plot()
                 #test_s = test_env.reset()
                 # if i+1 == args['max_episodes']:
                 #     env.plot()
