@@ -44,8 +44,8 @@ def CBF(env, T_min, T_max, eta_1 = 0.5, eta_2 = 0.5):
 #===================================
 def CBF_rl(env, T_rl, T_min, T_max, eta_1 = 0.5, eta_2 = 0.5):
     
-
-    P = matrix(np.diag([0.0, 1e24,1e24]), tc='d')
+    #print('running - CBF_rl')
+    P = matrix(np.diag([1.0, 1e24,1e24]), tc='d')
     q = matrix(np.zeros(3))
 
 
@@ -63,7 +63,7 @@ def CBF_rl(env, T_rl, T_min, T_max, eta_1 = 0.5, eta_2 = 0.5):
     G = np.array([[-a_1, -1., 0.], [a_1, 0., -1.], [-1., 0., 0.], [1., 0., 0.]]).astype(np.double)
     G = matrix(G,tc='d')
 
-    h = np.array([Delta_1, Delta_2, -T_min, T_max])
+    h = np.array([Delta_1, Delta_2, T_rl-T_min, T_max-T_rl])
     #print(h)
     h = np.squeeze(h).astype(np.double)
     h = matrix(h, tc='d')

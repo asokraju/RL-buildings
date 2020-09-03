@@ -107,6 +107,7 @@ class two_zone_HVAC(gym.Env):
             #ax[i].set_ylim(0, des[i]+50)
             ax[i].legend()
         ax[i+1].plot(time[start:end], self.action_trajectory[start:end],  c = 'b', label='Input (T_set)')
+        ax[i+1].legend()
         ax[0].set_title('Temperature', fontsize=20)
         ax[0].set_xlabel('Time', fontsize=20)
         ax[1].set_title('Cooling load', fontsize=20)

@@ -30,11 +30,11 @@ def main(args, reward_result):
     #initalizing environment
     test_env = two_zone_HVAC(d = d, A = A)
     env = two_zone_HVAC(d = d, A = A)
-
+    print('starting the scaling')
     test_s = test_env.reset()
     test_obs=[]
     test_steps = env.total_no_of_steps-1
-    test_episodes = 2000
+    test_episodes = 20
     for _ in range(test_episodes):
         for _ in range(test_steps):
             u = env.action_space.sample()
@@ -44,6 +44,7 @@ def main(args, reward_result):
     scaler = Scaler(2)
     scaler.update(np.concatenate(test_obs).reshape((test_steps*test_episodes,env.observation_space.shape[0])))
     var, mean = scaler.get()
+    print('finished the scaling')
     print(var, mean)
     # obs = []
     # for _ in range(200):
@@ -198,12 +199,12 @@ if __name__ == '__main__':
 
     #Network parameters
     parser.add_argument('--time_steps', help='Number of time-steps for rnn (LSTM)', type = int, default=6)
-    parser.add_argument('--actor_rnn', help='actor network rnn paramerters', type = int, default=20)
-    parser.add_argument('--actor_l1', help='actor network layer 1 parameters', type = int, default=100)
-    parser.add_argument('--actor_l2', help='actor network layer 2 parameters', type = int, default=100)
-    parser.add_argument('--critic_rnn', help='critic network rnn parameters', type = int, default=20)
-    parser.add_argument('--critic_l1', help='actor network layer 1 parameters', type = int, default=100)
-    parser.add_argument('--critic_l2', help='actor network layer 2 parameters', type = int, default=100)
+    parser.add_argument('--actor_rnn', help='actor network rnn paramerters', type = int, default=10)
+    parser.add_argument('--actor_l1', help='actor network layer 1 parameters', type = int, default=20)
+    parser.add_argument('--actor_l2', help='actor network layer 2 parameters', type = int, default=20)
+    parser.add_argument('--critic_rnn', help='critic network rnn parameters', type = int, default=10)
+    parser.add_argument('--critic_l1', help='actor network layer 1 parameters', type = int, default=20)
+    parser.add_argument('--critic_l2', help='actor network layer 2 parameters', type = int, default=20)
     parser.add_argument('--tau', help='target network learning rate', type = float, default=0.001)
     
     args = vars(parser.parse_args())

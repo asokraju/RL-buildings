@@ -537,14 +537,17 @@ def train_rnn(env, test_env, args, actor, critic, actor_noise, reward_result, sc
 ##----------------------------------------------------------------------------------------------------------------------------
 ##-------------------------------------------With CBF---------------------------------------------------
 ##----------------------------------------------------------------------------------------------------------------------------
-
-##---------------------------------------------------------------------------------------------------------------
-def train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result, scaler, replay_buffer, true_states, CBF_rl):
+def train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result, scaler, replay_buffer, true_states, CBF_rl, T_min = 24, T_max = 26, u_min = 23, u_max =26):
+    print('running - train_rnn_cbf')
     writer = tf.summary.create_file_writer(logdir = args['summary_dir'])
     actor.update_target_network()
     critic.update_target_network()
     time_steps = args['time_steps']
-
+    min_temp = T_min
+    max_temp = T_max
+    u_min = u_min
+    u_max = u_max
+    delta_u = u_max - u_min
 
     paths = list()
 
@@ -564,11 +567,19 @@ def train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result
             s_scaled = np.float32((s - mean) * var)
             obs_scaled.append(s_scaled)
             obs.append(s)
-            T_rl = env.action_space.sample()
-            delta_cbf = CBF_rl(env, T_rl[0], T_min =22, T_max=23, eta_1 = 0.5, eta_2 = 0.5)
-            a_cbf = np.array(T_rl + delta_cbf, dtype="float32")
-            s, r, terminal, info = env.step(act)
-            actions.append(a_cbf)
+            #sampling a random input (-1,1)
+            a_rl = env.action_space.sample()
+            #rescaling the input to (u_min, u_max)
+            T_rl = (a_rl + 1)*(delta_u/2) + u_min
+            #Projection
+            delta_cbf = CBF_rl(env, T_rl[0], T_min =min_temp, T_max=max_temp, eta_1 = 0.5, eta_2 = 0.5)
+            T_cbf = T_rl + delta_cbf
+            #rescaling the input to (-1, 1)
+            a_cbf = (T_cbf - u_min)*(2/delta_u) - 1
+
+            #next step
+            s, _,_,_ = env.step(a_cbf)
+            actions.append(T_cbf)
 
         s_scaled = np.float32((s - mean) * var)
         obs_scaled.append(s_scaled)
@@ -578,16 +589,20 @@ def train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result
 
             
             S_0 = obs_scaled[-args['time_steps']: ]
-            
+            #print('i ={} , j={}'.format(i,j))
             #noise annealing
             noise = np.random.normal(0, args['noise_var']/((j/100)+1))
-            a = actor.predict(np.reshape(S_0, (1, args['time_steps'], args['state_dim']))) + noise
-
+            a_rl = actor.predict(np.reshape(S_0, (1, args['time_steps'], args['state_dim']))) + noise
             # action should be inbetween -1 and 1
-            #print(a)
-            a = np.clip(a, -args['action_bound'], args['action_bound'])
-            delta_cbf = CBF_rl(env, a[0][0], T_min =22, T_max=23, eta_1 = 0.5, eta_2 = 0.5)
-            a_cbf = a[0] + delta_cbf
+            #a_rl = np.clip(a_rl, -args['action_bound'], args['action_bound'])[0]
+            #rescaling the input to (u_min, u_max)
+            T_rl = (a_rl.numpy()[0] + 1)*(delta_u/2) + u_min
+            #Projection
+            delta_cbf = CBF_rl(env, T_rl[0], T_min =min_temp, T_max=max_temp, eta_1 = 0.5, eta_2 = 0.5)
+            T_cbf = T_rl + delta_cbf
+            #rescaling the input to (-1, 1)
+            a_cbf = (T_cbf - u_min)*(2/delta_u) - 1
+            #print('a_rl = {}, T_rl = {}, delta_cbf = {}, T_cbf ={}, a_cbf = {}'.format(a_rl,T_rl,delta_cbf,T_cbf,a_cbf))
             s2, r, terminal, info = env.step(a_cbf)
             s2_scaled = np.float32((s2 - mean) * var)
 
@@ -595,7 +610,7 @@ def train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result
             obs_scaled.append(s2_scaled)
             S_2 = obs_scaled[-args['time_steps']: ]
 
-            replay_buffer.add(S_0, np.reshape(a_cbf, (actor.action_dim,)), r, terminal, S_2)
+            replay_buffer.add(S_0, np.reshape(T_cbf, (actor.action_dim,)), r, terminal, S_2)
             if replay_buffer.size() > args['mini_batch_size']:
                 s_batch, a_batch, r_batch, t_batch, s2_batch = replay_buffer.sample_batch(args['mini_batch_size'])
 
@@ -626,6 +641,7 @@ def train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result
             actions.append(a_cbf)
             rewards.append(r)
             #print('j: {}, max episode len: {}, terminal: {}, steps-count: {}'.format(j,args['max_episode_len'], terminal, env.count_steps))
+            #print("episode reward", ep_reward, r)
             #if j+args['time_steps'] == args['max_episode_len']:
             if terminal:
                 with writer.as_default():
@@ -640,7 +656,7 @@ def train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result
                     "Reward":np.asarray(rewards)
                     }
                 paths.append(path)
-                #env.plot(true_states, plot_original=False, savefig_filename = path+'/results/cbf_plot')
+                #env.plot(true_states, plot_original=False)
                 #test_s = test_env.reset()
                 # if i+1 == args['max_episodes']:
                 #     env.plot()

@@ -31,23 +31,24 @@ def main(args, reward_result):
     #initalizing environment
     test_env = two_zone_HVAC(d = d, A = A)
     env = two_zone_HVAC(d = d, A = A)
-
+    print('starting the scaling')
     test_s = test_env.reset()
     test_obs=[]
     test_steps = env.total_no_of_steps-1
-    test_episodes = 200
+    test_episodes = 20
     for _ in range(test_episodes):
         for _ in range(test_steps):
             T_rl = env.action_space.sample()
-            delta_cbf = CBF_rl(env, T_rl[0], T_min =22, T_max=23, eta_1 = 0.5, eta_2 = 0.5)
-            a_cbf = np.array(T_rl + delta_cbf, dtype="float32")
+            #delta_cbf = CBF_rl(env, T_rl[0], T_min =22, T_max=23, eta_1 = 0.5, eta_2 = 0.5)
+            #a_cbf = np.array(T_rl + delta_cbf, dtype="float32")
             #print('main', a_cbf)
-            s, _,_,_ = test_env.step(a_cbf)
+            s, _,_,_ = test_env.step(T_rl)
             test_obs.append(s)
         test_env.reset()
     scaler = Scaler(2)
     scaler.update(np.concatenate(test_obs).reshape((test_steps*test_episodes,env.observation_space.shape[0])))
     var, mean = scaler.get()
+    print('finished the scaling')
     print(var, mean)
     # obs = []
     # for _ in range(200):
@@ -59,7 +60,7 @@ def main(args, reward_result):
 
     ##-----------------------------------------------------------
     state = env.reset()
-
+    print('initalizing the actor and critic func')
     actor = ActorNetwork_rnn(
         state_dim = args['state_dim'],
         action_dim = args['action_dim'], 
@@ -84,7 +85,7 @@ def main(args, reward_result):
         params_l2 = args['critic_l2'],
         time_steps = args['time_steps']
         )
-
+    print('loading the weights')
     #loading the weights
     if args['load_model']:
         if os.path.isfile(args['summary_dir'] + "/results/actor_weights.h5"):
@@ -105,8 +106,9 @@ def main(args, reward_result):
     #reward_result = np.zeros(2500)
     print(actor.actor_model.summary())
     print(critic.critic_model.summary())
-    paths, reward_result = train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result, scaler, replay_buffer, true_states, CBF_rl)
-
+    print('starting the simulation')
+    paths, reward_result = train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result, scaler, replay_buffer, true_states, CBF_rl, T_min = 24, T_max = 26, u_min = 23, u_max =26)
+    print('saving weights')
     # Saving the weights
     if args['save_model']:
         actor.actor_model.save_weights(
@@ -127,7 +129,7 @@ def main(args, reward_result):
             save_format='h5')
 
     #---------------------------------------------------------------------------
-    #Plotting an new testing environment
+    print('Plotting an new testing environment')
     if args['scaling']:
         var, mean = scaler.get()
     else:
@@ -135,17 +137,26 @@ def main(args, reward_result):
 
     obs_scaled, obs, actions = [], [], []
     test_s = test_env.reset()
+    u_min = 23
+    u_max =26
+    delta_u = u_max-u_min
     for _ in range(args['time_steps']-1):
         s_scaled = np.float32((test_s - mean) * var)
         obs_scaled.append(s_scaled)
         obs.append(test_s)
-        T_rl = test_env.action_space.sample()
+
+        a_rl = test_env.action_space.sample()
+        #rescaling the input to (u_min, u_max)
+        T_rl = (a_rl + 1)*(delta_u/2) + u_min
+        #Projection
         delta_cbf = CBF_rl(test_env, T_rl[0], T_min =22, T_max=23, eta_1 = 0.5, eta_2 = 0.5)
-        a_cbf = np.array(T_rl + delta_cbf, dtype="float32")
-        print('final ploting', a_cbf)
+        T_cbf = T_rl + delta_cbf
+        #rescaling the input to (-1, 1)
+        a_cbf = (T_cbf - u_min)*(2/delta_u) - 1
+        print('a_rl = {}, T_rl = {}, delta_cbf = {}, T_cbf ={}, a_cbf = {}'.format(a_rl,T_rl,delta_cbf,T_cbf,a_cbf))
         test_s, r, terminal, info = test_env.step(a_cbf)
         #actions.append(a_cbf)
-
+    
     s_scaled = np.float32((test_s - mean) * var)
     obs_scaled.append(s_scaled)
     obs.append(test_s)   
@@ -161,7 +172,7 @@ def main(args, reward_result):
         obs_scaled.append(s2_scaled)
         if terminal:
             break
-    savefig_filename = args['summary_dir']+'/results/results_plot.png'
+    savefig_filename = args['summary_dir']+'/results/results_plot_cbf.png'
     #test_env.plot(savefig_filename=savefig_filename)
     test_env.plot(true_states, plot_original=False, savefig_filename = savefig_filename)
     savemat(args['summary_dir'] + '/results/data.mat',
@@ -192,7 +203,7 @@ if __name__ == '__main__':
     
     #agent params
     parser.add_argument('--buffer_size', help='replay buffer size', type = int, default=1000000)
-    parser.add_argument('--max_episodes', help='max number of episodes', type = int, default=2)
+    parser.add_argument('--max_episodes', help='max number of episodes', type = int, default=30)
     parser.add_argument('--max_episode_len', help='Number of steps per epsiode', type = int, default=env.total_no_of_steps)
     parser.add_argument('--mini_batch_size', help='sampling batch size',type =int, default=300)
     parser.add_argument('--actor_lr', help='actor network learning rate',type =float, default=0.0001)
@@ -209,12 +220,12 @@ if __name__ == '__main__':
 
     #Network parameters
     parser.add_argument('--time_steps', help='Number of time-steps for rnn (LSTM)', type = int, default=6)
-    parser.add_argument('--actor_rnn', help='actor network rnn paramerters', type = int, default=20)
-    parser.add_argument('--actor_l1', help='actor network layer 1 parameters', type = int, default=100)
-    parser.add_argument('--actor_l2', help='actor network layer 2 parameters', type = int, default=100)
-    parser.add_argument('--critic_rnn', help='critic network rnn parameters', type = int, default=20)
-    parser.add_argument('--critic_l1', help='actor network layer 1 parameters', type = int, default=100)
-    parser.add_argument('--critic_l2', help='actor network layer 2 parameters', type = int, default=100)
+    parser.add_argument('--actor_rnn', help='actor network rnn paramerters', type = int, default=10)
+    parser.add_argument('--actor_l1', help='actor network layer 1 parameters', type = int, default=30)
+    parser.add_argument('--actor_l2', help='actor network layer 2 parameters', type = int, default=40)
+    parser.add_argument('--critic_rnn', help='critic network rnn parameters', type = int, default=10)
+    parser.add_argument('--critic_l1', help='actor network layer 1 parameters', type = int, default=30)
+    parser.add_argument('--critic_l2', help='actor network layer 2 parameters', type = int, default=20)
     parser.add_argument('--tau', help='target network learning rate', type = float, default=0.001)
     
     args = vars(parser.parse_args())
