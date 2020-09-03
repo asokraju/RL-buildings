@@ -153,7 +153,7 @@ def main(args, reward_result):
         T_cbf = T_rl + delta_cbf
         #rescaling the input to (-1, 1)
         a_cbf = (T_cbf - u_min)*(2/delta_u) - 1
-        print('a_rl = {}, T_rl = {}, delta_cbf = {}, T_cbf ={}, a_cbf = {}'.format(a_rl,T_rl,delta_cbf,T_cbf,a_cbf))
+        #print('a_rl = {}, T_rl = {}, delta_cbf = {}, T_cbf ={}, a_cbf = {}'.format(a_rl,T_rl,delta_cbf,T_cbf,a_cbf))
         test_s, r, terminal, info = test_env.step(a_cbf)
         #actions.append(a_cbf)
     
@@ -163,9 +163,14 @@ def main(args, reward_result):
     #actions.append([test_env.action_space.sample()])
     for _ in range(test_env.total_no_of_steps-args['time_steps']+1):
         S_0 = obs_scaled[-args['time_steps']:]
-        T_rl = actor.predict(np.reshape(S_0, (1, args['time_steps'], args['state_dim'])))[0]
+        a_rl = actor.predict(np.reshape(S_0, (1, args['time_steps'], args['state_dim'])))
+        T_rl = (a_rl + 1)*(delta_u/2) + u_min
         delta_cbf = CBF_rl(test_env, T_rl[0], T_min =22, T_max=23, eta_1 = 0.5, eta_2 = 0.5)
-        a_cbf = np.array(T_rl + delta_cbf, dtype="float32")
+        T_cbf = T_rl + delta_cbf
+        #rescaling the input to (-1, 1)
+        a_cbf = (T_cbf - u_min)*(2/delta_u) - 1
+        #delta_cbf = CBF_rl(test_env, T_rl[0], T_min =22, T_max=23, eta_1 = 0.5, eta_2 = 0.5)
+        #a_cbf = np.array(T_rl + delta_cbf, dtype="float32")
 
         test_s, r, terminal, info = test_env.step(a_cbf)
         s2_scaled = np.float32((test_s - mean) * var)
@@ -203,7 +208,7 @@ if __name__ == '__main__':
     
     #agent params
     parser.add_argument('--buffer_size', help='replay buffer size', type = int, default=1000000)
-    parser.add_argument('--max_episodes', help='max number of episodes', type = int, default=30)
+    parser.add_argument('--max_episodes', help='max number of episodes', type = int, default=1)
     parser.add_argument('--max_episode_len', help='Number of steps per epsiode', type = int, default=env.total_no_of_steps)
     parser.add_argument('--mini_batch_size', help='sampling batch size',type =int, default=300)
     parser.add_argument('--actor_lr', help='actor network learning rate',type =float, default=0.0001)
