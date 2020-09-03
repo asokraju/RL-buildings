@@ -568,7 +568,8 @@ def train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result
             #rescaling the input to (u_min, u_max)
             T_rl = (a_rl + 1)*(delta_u/2) + args['T_set_max_min'][0]
             #Projection
-            delta_cbf = CBF_rl(env, T_rl[0], T_min =args['T_max_min'][0], T_max=args['T_max_min'][1], eta_1 = 0.5, eta_2 = 0.5)
+            delta_cbf = CBF_rl(env, T_rl[0], args=args, eta_1 = 0.5, eta_2 = 0.5)
+            #T_min =args['T_max_min'][0], T_max=args['T_max_min'][1]
             T_cbf = T_rl + delta_cbf
             #rescaling the input to (-1, 1)
             a_cbf = (T_cbf - args['T_set_max_min'][0])*(2/delta_u) - 1
@@ -594,7 +595,7 @@ def train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result
             #rescaling the input to (u_min, u_max)
             T_rl = (a_rl.numpy()[0] + 1)*(delta_u/2) + args['T_set_max_min'][0]
             #Projection
-            delta_cbf = CBF_rl(env, T_rl[0], T_min =args['T_max_min'][0], T_max=args['T_max_min'][1], eta_1 = 0.5, eta_2 = 0.5)
+            delta_cbf = CBF_rl(env, T_rl[0], args =args, eta_1 = 0.5, eta_2 = 0.5)
             T_cbf = T_rl + delta_cbf
             #rescaling the input to (-1, 1)
             a_cbf = (T_cbf - args['T_set_max_min'][0])*(2/delta_u) - 1

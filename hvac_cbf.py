@@ -144,7 +144,7 @@ def main(args, reward_result):
         #rescaling the input to (u_min, u_max)
         T_rl = (a_rl + 1)*(delta_u/2) + args['T_set_max_min'][0]
         #Projection
-        delta_cbf = CBF_rl(test_env, T_rl[0], T_min =args['T_max_min'][0], T_max=args['T_max_min'][1], eta_1 = 0.5, eta_2 = 0.5)
+        delta_cbf = CBF_rl(test_env, T_rl[0], args = args, eta_1 = 0.5, eta_2 = 0.5)
         T_cbf = T_rl + delta_cbf
         #rescaling the input to (-1, 1)
         a_cbf = (T_cbf - args['T_set_max_min'][0])*(2/delta_u) - 1
@@ -160,7 +160,7 @@ def main(args, reward_result):
         S_0 = obs_scaled[-args['time_steps']:]
         a_rl = actor.predict(np.reshape(S_0, (1, args['time_steps'], args['state_dim'])))
         T_rl = (a_rl + 1)*(delta_u/2) + args['T_set_max_min'][0]
-        delta_cbf = CBF_rl(test_env, T_rl[0], T_min =args['T_max_min'][0], T_max=args['T_set_max_min'][1], eta_1 = 0.5, eta_2 = 0.5)
+        delta_cbf = CBF_rl(test_env, T_rl[0], args = args, eta_1 = 0.5, eta_2 = 0.5)
         T_cbf = T_rl + delta_cbf
         #rescaling the input to (-1, 1)
         a_cbf = (T_cbf - args['T_set_max_min'][0])*(2/delta_u) - 1
@@ -205,7 +205,7 @@ if __name__ == '__main__':
     
     #agent params
     parser.add_argument('--buffer_size', help='replay buffer size', type = int, default=1000000)
-    parser.add_argument('--max_episodes', help='max number of episodes', type = int, default=200)
+    parser.add_argument('--max_episodes', help='max number of episodes', type = int, default=20)
     parser.add_argument('--max_episode_len', help='Number of steps per epsiode', type = int, default=env.total_no_of_steps)
     parser.add_argument('--mini_batch_size', help='sampling batch size',type =int, default=300)
     parser.add_argument('--actor_lr', help='actor network learning rate',type =float, default=0.0001)
@@ -220,7 +220,7 @@ if __name__ == '__main__':
     parser.add_argument('--action_bound', help='upper and lower bound of the actions', type = float, default=action_bound)
     parser.add_argument('--discretization_time', help='discretization time used for the environment ', type = float, default=1e-3)
     parser.add_argument('--T_set_max_min', help='Min and Max of T_set  (input) ', type = lambda s: [float(item) for item in s.split(',')], default=[23., 26.])
-    parser.add_argument('--T_max_min', help='Min and Max of T (state) ', type = lambda s: [float(item) for item in s.split(',')], default=[22., 23.])
+    parser.add_argument('--T_max_min', help='Min and Max of T (state) ', type = lambda s: [float(item) for item in s.split(',')], default=[22., 25.])
 
     #Network parameters
     parser.add_argument('--time_steps', help='Number of time-steps for rnn (LSTM)', type = int, default=6)
