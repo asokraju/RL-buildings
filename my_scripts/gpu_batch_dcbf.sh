@@ -23,7 +23,7 @@ cd $TS_DIR
 mkdir -p $END_DIR                         #making a directory for parameter time steps name
 cd $END_DIR
 
-export run_exec=$PARENT_DIR/microgrid_dcbf.py #python script that we want to run
+export run_exec=$PARENT_DIR/hvac_cbf.py #python script that we want to run
 #export run_exec=/afs/crc.nd.edu/user/k/kkosaraj/kristools/microgrid_dcbf.py
 export run_flags="--gamma=${GAMMA} --time_steps=${TS} --summary_dir="$(dirname $PWD)" > out.txt"   #flags for the script
 
