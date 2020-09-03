@@ -1,0 +1,334 @@
+summary_dir /afs/crc.nd.edu/user/k/kkosaraj/GITHUB_BUILD_1/my_scripts/test_name=dcbf_2/gamma=0.99/time_steps=4
+use_gpu True
+save_model True
+load_model False
+random_seed 1754
+buffer_size 1000000
+max_episodes 200
+max_episode_len 1464
+mini_batch_size 300
+actor_lr 0.0001
+critic_lr 0.001
+gamma 0.99
+noise_var 0.0925
+scaling True
+state_dim 2
+action_dim 1
+action_bound [1.]
+discretization_time 0.001
+T_set_max_min [23.0, 26.0]
+T_max_min [22.0, 23.0]
+time_steps 4
+actor_rnn 10
+actor_l1 50
+actor_l2 40
+critic_rnn 10
+critic_l1 50
+critic_l2 20
+tau 0.001
+{'T_max_min': [22.0, 23.0],
+ 'T_set_max_min': [23.0, 26.0],
+ 'action_bound': array([1.], dtype=float32),
+ 'action_dim': 1,
+ 'actor_l1': 50,
+ 'actor_l2': 40,
+ 'actor_lr': 0.0001,
+ 'actor_rnn': 10,
+ 'buffer_size': 1000000,
+ 'critic_l1': 50,
+ 'critic_l2': 20,
+ 'critic_lr': 0.001,
+ 'critic_rnn': 10,
+ 'discretization_time': 0.001,
+ 'gamma': 0.99,
+ 'load_model': False,
+ 'max_episode_len': 1464,
+ 'max_episodes': 200,
+ 'mini_batch_size': 300,
+ 'noise_var': 0.0925,
+ 'random_seed': 1754,
+ 'save_model': True,
+ 'scaling': True,
+ 'state_dim': 2,
+ 'summary_dir': '/afs/crc.nd.edu/user/k/kkosaraj/GITHUB_BUILD_1/my_scripts/test_name=dcbf_2/gamma=0.99/time_steps=4',
+ 'tau': 0.001,
+ 'time_steps': 4,
+ 'use_gpu': True}
+starting the scaling
+finished the scaling
+[0.48193151 0.02817743] [ 24.00994181 -28.55276557]
+initalizing the actor and critic func
+loading the weights
+Model: "actor_network"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+actor_input_state (InputLaye [(None, 4, 2)]            0         
+_________________________________________________________________
+conv1d (Conv1D)              (None, 3, 16)             80        
+_________________________________________________________________
+actor_rnn (GRU)              (None, 10)                840       
+_________________________________________________________________
+actor_dense_1 (Dense)        (None, 50)                550       
+_________________________________________________________________
+batch_normalization (BatchNo (None, 50)                200       
+_________________________________________________________________
+activation (Activation)      (None, 50)                0         
+_________________________________________________________________
+actor_dense_2 (Dense)        (None, 40)                2040      
+_________________________________________________________________
+batch_normalization_1 (Batch (None, 40)                160       
+_________________________________________________________________
+activation_1 (Activation)    (None, 40)                0         
+_________________________________________________________________
+actor_dense_3 (Dense)        (None, 1)                 41        
+_________________________________________________________________
+tf_op_layer_actions_scaling  [(None, 1)]               0         
+=================================================================
+Total params: 3,911
+Trainable params: 3,731
+Non-trainable params: 180
+_________________________________________________________________
+None
+Model: "critic_network"
+__________________________________________________________________________________________________
+Layer (type)                    Output Shape         Param #     Connected to                     
+==================================================================================================
+critic_input_state (InputLayer) [(None, 4, 2)]       0                                            
+__________________________________________________________________________________________________
+conv1d_2 (Conv1D)               (None, 3, 16)        80          critic_input_state[0][0]         
+__________________________________________________________________________________________________
+gru (GRU)                       (None, 10)           840         conv1d_2[0][0]                   
+__________________________________________________________________________________________________
+critic_dense_1 (Dense)          (None, 50)           550         gru[0][0]                        
+__________________________________________________________________________________________________
+batch_normalization_4 (BatchNor (None, 50)           200         critic_dense_1[0][0]             
+__________________________________________________________________________________________________
+activation_4 (Activation)       (None, 50)           0           batch_normalization_4[0][0]      
+__________________________________________________________________________________________________
+critic_input_action (InputLayer [(None, 1)]          0                                            
+__________________________________________________________________________________________________
+critic_dense_2_state (Dense)    (None, 20)           1020        activation_4[0][0]               
+__________________________________________________________________________________________________
+critic_dense_2_action (Dense)   (None, 20)           40          critic_input_action[0][0]        
+__________________________________________________________________________________________________
+concatenate (Concatenate)       (None, 40)           0           critic_dense_2_state[0][0]       
+                                                                 critic_dense_2_action[0][0]      
+__________________________________________________________________________________________________
+critic_dense_3_state (Dense)    (None, 20)           820         concatenate[0][0]                
+__________________________________________________________________________________________________
+batch_normalization_5 (BatchNor (None, 20)           80          critic_dense_3_state[0][0]       
+__________________________________________________________________________________________________
+activation_5 (Activation)       (None, 20)           0           batch_normalization_5[0][0]      
+__________________________________________________________________________________________________
+Q_val (Dense)                   (None, 1)            21          activation_5[0][0]               
+==================================================================================================
+Total params: 3,651
+Trainable params: 3,511
+Non-trainable params: 140
+__________________________________________________________________________________________________
+None
+starting the simulation
+running - train_rnn_cbf
+| Reward: 11291.8122 | Episode: 0 | Qmax: 9.9783
+| Reward: 11291.8139 | Episode: 1 | Qmax: 19.6544
+| Reward: 11291.8046 | Episode: 2 | Qmax: 32.8465
+| Reward: 11291.8055 | Episode: 3 | Qmax: 48.1598
+| Reward: 11291.8139 | Episode: 4 | Qmax: 63.1275
+| Reward: 11291.8068 | Episode: 5 | Qmax: 77.2528
+| Reward: 11291.8116 | Episode: 6 | Qmax: 90.6726
+| Reward: 11291.8103 | Episode: 7 | Qmax: 103.9162
+| Reward: 11291.8051 | Episode: 8 | Qmax: 115.5439
+| Reward: 11291.8097 | Episode: 9 | Qmax: 125.9928
+| Reward: 11291.8096 | Episode: 10 | Qmax: 135.4598
+| Reward: 11291.8075 | Episode: 11 | Qmax: 143.7471
+| Reward: 11291.8134 | Episode: 12 | Qmax: 151.0202
+| Reward: 11291.8135 | Episode: 13 | Qmax: 158.1491
+| Reward: 11291.8100 | Episode: 14 | Qmax: 165.1176
+| Reward: 11291.8100 | Episode: 15 | Qmax: 172.2875
+| Reward: 11291.8081 | Episode: 16 | Qmax: 179.9665
+| Reward: 11291.8089 | Episode: 17 | Qmax: 188.3540
+| Reward: 11291.8057 | Episode: 18 | Qmax: 197.4650
+| Reward: 11291.8060 | Episode: 19 | Qmax: 207.1744
+| Reward: 11291.8066 | Episode: 20 | Qmax: 217.1404
+| Reward: 11291.8115 | Episode: 21 | Qmax: 227.9121
+| Reward: 11291.8057 | Episode: 22 | Qmax: 238.2458
+| Reward: 11291.8082 | Episode: 23 | Qmax: 248.3979
+| Reward: 11291.8126 | Episode: 24 | Qmax: 257.8149
+| Reward: 11291.8054 | Episode: 25 | Qmax: 266.8666
+| Reward: 11291.8358 | Episode: 26 | Qmax: 275.3423
+| Reward: 11291.9803 | Episode: 27 | Qmax: 283.2564
+| Reward: 11291.8137 | Episode: 28 | Qmax: 290.7165
+| Reward: 11291.8086 | Episode: 29 | Qmax: 297.7645
+| Reward: 11291.8097 | Episode: 30 | Qmax: 304.5647
+| Reward: 11291.9333 | Episode: 31 | Qmax: 311.0827
+| Reward: 11291.8096 | Episode: 32 | Qmax: 317.1584
+| Reward: 11291.8192 | Episode: 33 | Qmax: 323.4197
+| Reward: 11291.8339 | Episode: 34 | Qmax: 329.3083
+| Reward: 11291.8335 | Episode: 35 | Qmax: 335.2548
+| Reward: 11291.9424 | Episode: 36 | Qmax: 341.5212
+| Reward: 11293.0644 | Episode: 37 | Qmax: 348.3838
+| Reward: 11293.4612 | Episode: 38 | Qmax: 355.4495
+| Reward: 11292.3418 | Episode: 39 | Qmax: 362.3529
+| Reward: 11292.9511 | Episode: 40 | Qmax: 368.7594
+| Reward: 11292.7583 | Episode: 41 | Qmax: 375.1178
+| Reward: 11291.8134 | Episode: 42 | Qmax: 381.4710
+| Reward: 11291.8427 | Episode: 43 | Qmax: 387.7242
+| Reward: 11292.4958 | Episode: 44 | Qmax: 393.7225
+| Reward: 11293.1081 | Episode: 45 | Qmax: 399.4002
+| Reward: 11292.6758 | Episode: 46 | Qmax: 404.9879
+| Reward: 11294.9581 | Episode: 47 | Qmax: 410.4765
+| Reward: 11295.2124 | Episode: 48 | Qmax: 415.9181
+| Reward: 11295.8196 | Episode: 49 | Qmax: 421.3704
+| Reward: 11295.5934 | Episode: 50 | Qmax: 426.4712
+| Reward: 11295.9680 | Episode: 51 | Qmax: 431.7512
+| Reward: 11296.0546 | Episode: 52 | Qmax: 436.7224
+| Reward: 11295.9025 | Episode: 53 | Qmax: 441.7315
+| Reward: 11296.3562 | Episode: 54 | Qmax: 447.0058
+| Reward: 11295.8072 | Episode: 55 | Qmax: 451.8141
+| Reward: 11296.4745 | Episode: 56 | Qmax: 457.0487
+| Reward: 11295.8958 | Episode: 57 | Qmax: 461.8602
+| Reward: 11296.0297 | Episode: 58 | Qmax: 466.9542
+| Reward: 11296.1579 | Episode: 59 | Qmax: 471.8096
+| Reward: 11296.4102 | Episode: 60 | Qmax: 476.7640
+| Reward: 11295.7677 | Episode: 61 | Qmax: 481.5149
+| Reward: 11296.0388 | Episode: 62 | Qmax: 486.1077
+| Reward: 11295.8512 | Episode: 63 | Qmax: 490.6176
+| Reward: 11296.3439 | Episode: 64 | Qmax: 494.8256
+| Reward: 11296.1622 | Episode: 65 | Qmax: 498.8435
+| Reward: 11296.2648 | Episode: 66 | Qmax: 503.2542
+| Reward: 11295.6304 | Episode: 67 | Qmax: 507.2767
+| Reward: 11296.0745 | Episode: 68 | Qmax: 511.4300
+| Reward: 11296.0560 | Episode: 69 | Qmax: 515.8155
+| Reward: 11296.0735 | Episode: 70 | Qmax: 520.0040
+| Reward: 11295.9210 | Episode: 71 | Qmax: 524.2221
+| Reward: 11296.1021 | Episode: 72 | Qmax: 528.6975
+| Reward: 11296.2104 | Episode: 73 | Qmax: 532.7530
+| Reward: 11295.5025 | Episode: 74 | Qmax: 537.1023
+| Reward: 11295.7853 | Episode: 75 | Qmax: 540.8880
+| Reward: 11296.1085 | Episode: 76 | Qmax: 544.9497
+| Reward: 11295.7777 | Episode: 77 | Qmax: 548.5949
+| Reward: 11296.2281 | Episode: 78 | Qmax: 552.0642
+| Reward: 11296.4913 | Episode: 79 | Qmax: 555.6604
+| Reward: 11296.1731 | Episode: 80 | Qmax: 559.0675
+| Reward: 11295.8302 | Episode: 81 | Qmax: 562.6304
+| Reward: 11296.2891 | Episode: 82 | Qmax: 565.8787
+| Reward: 11296.4637 | Episode: 83 | Qmax: 568.7548
+| Reward: 11296.3361 | Episode: 84 | Qmax: 571.7842
+| Reward: 11296.1251 | Episode: 85 | Qmax: 574.1104
+| Reward: 11296.0134 | Episode: 86 | Qmax: 576.8260
+| Reward: 11295.8808 | Episode: 87 | Qmax: 579.3907
+| Reward: 11296.2213 | Episode: 88 | Qmax: 581.8941
+| Reward: 11296.2005 | Episode: 89 | Qmax: 584.5704
+| Reward: 11296.2353 | Episode: 90 | Qmax: 587.6461
+| Reward: 11296.0023 | Episode: 91 | Qmax: 589.9668
+| Reward: 11295.7800 | Episode: 92 | Qmax: 592.5022
+| Reward: 11296.0900 | Episode: 93 | Qmax: 594.8462
+| Reward: 11295.9626 | Episode: 94 | Qmax: 597.6491
+| Reward: 11296.1478 | Episode: 95 | Qmax: 600.1807
+| Reward: 11295.8273 | Episode: 96 | Qmax: 603.3084
+| Reward: 11295.8730 | Episode: 97 | Qmax: 605.6662
+| Reward: 11296.2169 | Episode: 98 | Qmax: 608.9723
+| Reward: 11296.2465 | Episode: 99 | Qmax: 611.6077
+| Reward: 11295.9196 | Episode: 100 | Qmax: 613.8263
+| Reward: 11295.7595 | Episode: 101 | Qmax: 616.5392
+| Reward: 11295.6423 | Episode: 102 | Qmax: 619.6987
+| Reward: 11296.2568 | Episode: 103 | Qmax: 622.0861
+| Reward: 11296.3506 | Episode: 104 | Qmax: 624.8200
+| Reward: 11296.2483 | Episode: 105 | Qmax: 628.1123
+| Reward: 11295.9804 | Episode: 106 | Qmax: 629.9835
+| Reward: 11295.7850 | Episode: 107 | Qmax: 632.4940
+| Reward: 11295.9291 | Episode: 108 | Qmax: 635.4215
+| Reward: 11296.4372 | Episode: 109 | Qmax: 637.7281
+| Reward: 11296.1324 | Episode: 110 | Qmax: 641.2529
+| Reward: 11296.0090 | Episode: 111 | Qmax: 643.1970
+| Reward: 11295.8479 | Episode: 112 | Qmax: 645.4705
+| Reward: 11296.0781 | Episode: 113 | Qmax: 647.6397
+| Reward: 11296.1647 | Episode: 114 | Qmax: 649.7847
+| Reward: 11295.9890 | Episode: 115 | Qmax: 651.9753
+| Reward: 11295.7976 | Episode: 116 | Qmax: 653.4993
+| Reward: 11296.3390 | Episode: 117 | Qmax: 655.3389
+| Reward: 11296.1728 | Episode: 118 | Qmax: 658.2871
+| Reward: 11295.9349 | Episode: 119 | Qmax: 661.2266
+| Reward: 11295.9771 | Episode: 120 | Qmax: 663.6019
+| Reward: 11295.8441 | Episode: 121 | Qmax: 666.4963
+| Reward: 11295.9905 | Episode: 122 | Qmax: 666.8497
+| Reward: 11296.0132 | Episode: 123 | Qmax: 666.5100
+| Reward: 11295.9933 | Episode: 124 | Qmax: 668.3159
+| Reward: 11296.1894 | Episode: 125 | Qmax: 668.6910
+| Reward: 11296.2682 | Episode: 126 | Qmax: 670.7469
+| Reward: 11296.4085 | Episode: 127 | Qmax: 672.8295
+| Reward: 11296.2885 | Episode: 128 | Qmax: 674.0991
+| Reward: 11296.1565 | Episode: 129 | Qmax: 675.5343
+| Reward: 11295.7786 | Episode: 130 | Qmax: 678.0544
+| Reward: 11296.5737 | Episode: 131 | Qmax: 679.4782
+| Reward: 11295.8748 | Episode: 132 | Qmax: 682.3015
+| Reward: 11295.9183 | Episode: 133 | Qmax: 684.0024
+| Reward: 11295.8635 | Episode: 134 | Qmax: 685.3593
+| Reward: 11296.1517 | Episode: 135 | Qmax: 688.3080
+| Reward: 11295.9568 | Episode: 136 | Qmax: 691.6973
+| Reward: 11296.1508 | Episode: 137 | Qmax: 694.4294
+| Reward: 11295.8519 | Episode: 138 | Qmax: 697.0397
+| Reward: 11296.1869 | Episode: 139 | Qmax: 699.1005
+| Reward: 11296.2650 | Episode: 140 | Qmax: 701.2694
+| Reward: 11296.2896 | Episode: 141 | Qmax: 703.1532
+| Reward: 11296.5944 | Episode: 142 | Qmax: 705.0154
+| Reward: 11296.3910 | Episode: 143 | Qmax: 705.4894
+| Reward: 11296.2317 | Episode: 144 | Qmax: 706.3224
+| Reward: 11295.8598 | Episode: 145 | Qmax: 707.0229
+| Reward: 11296.1940 | Episode: 146 | Qmax: 708.9743
+| Reward: 11296.0776 | Episode: 147 | Qmax: 711.2289
+| Reward: 11295.8284 | Episode: 148 | Qmax: 713.6487
+| Reward: 11296.4008 | Episode: 149 | Qmax: 716.9801
+| Reward: 11295.9335 | Episode: 150 | Qmax: 720.0560
+| Reward: 11295.6730 | Episode: 151 | Qmax: 723.3369
+| Reward: 11296.1406 | Episode: 152 | Qmax: 726.9283
+| Reward: 11296.0285 | Episode: 153 | Qmax: 730.9014
+| Reward: 11296.2911 | Episode: 154 | Qmax: 734.4089
+| Reward: 11295.5317 | Episode: 155 | Qmax: 737.4969
+| Reward: 11296.4621 | Episode: 156 | Qmax: 740.6034
+| Reward: 11296.5753 | Episode: 157 | Qmax: 743.4401
+| Reward: 11296.2939 | Episode: 158 | Qmax: 744.1484
+| Reward: 11295.9239 | Episode: 159 | Qmax: 743.5795
+| Reward: 11295.3424 | Episode: 160 | Qmax: 741.8931
+| Reward: 11296.4423 | Episode: 161 | Qmax: 737.1599
+| Reward: 11295.9921 | Episode: 162 | Qmax: 733.5625
+| Reward: 11296.6684 | Episode: 163 | Qmax: 731.9986
+| Reward: 11295.8658 | Episode: 164 | Qmax: 731.5038
+| Reward: 11296.2077 | Episode: 165 | Qmax: 732.5648
+| Reward: 11295.9356 | Episode: 166 | Qmax: 733.0628
+| Reward: 11296.5760 | Episode: 167 | Qmax: 735.5581
+| Reward: 11295.8372 | Episode: 168 | Qmax: 739.8378
+| Reward: 11296.2373 | Episode: 169 | Qmax: 741.4927
+| Reward: 11296.0445 | Episode: 170 | Qmax: 742.8322
+| Reward: 11296.0734 | Episode: 171 | Qmax: 744.2560
+| Reward: 11296.6693 | Episode: 172 | Qmax: 746.0879
+| Reward: 11295.8395 | Episode: 173 | Qmax: 747.6015
+| Reward: 11296.2554 | Episode: 174 | Qmax: 749.6914
+| Reward: 11295.8353 | Episode: 175 | Qmax: 753.4801
+| Reward: 11296.0875 | Episode: 176 | Qmax: 765.9476
+| Reward: 11296.0179 | Episode: 177 | Qmax: 787.8001
+| Reward: 11295.9759 | Episode: 178 | Qmax: 811.6310
+| Reward: 11296.3104 | Episode: 179 | Qmax: 840.4896
+| Reward: 11296.0301 | Episode: 180 | Qmax: 868.7739
+| Reward: 11296.2318 | Episode: 181 | Qmax: 896.0100
+| Reward: 11296.3424 | Episode: 182 | Qmax: 922.7714
+| Reward: 11296.2006 | Episode: 183 | Qmax: 942.0676
+| Reward: 11296.1378 | Episode: 184 | Qmax: 961.4352
+| Reward: 11296.6284 | Episode: 185 | Qmax: 979.2205
+| Reward: 11296.4088 | Episode: 186 | Qmax: 993.3964
+| Reward: 11296.0296 | Episode: 187 | Qmax: 1009.0170
+| Reward: 11295.8533 | Episode: 188 | Qmax: 1021.4502
+| Reward: 11296.1259 | Episode: 189 | Qmax: 1033.3403
+| Reward: 11296.2990 | Episode: 190 | Qmax: 1049.8513
+| Reward: 11295.9886 | Episode: 191 | Qmax: 1073.7250
+| Reward: 11295.5443 | Episode: 192 | Qmax: 1093.0556
+| Reward: 11296.4267 | Episode: 193 | Qmax: 1114.3704
+| Reward: 11295.9726 | Episode: 194 | Qmax: 1132.1931
+| Reward: 11296.2848 | Episode: 195 | Qmax: 1150.0667
+| Reward: 11296.2117 | Episode: 196 | Qmax: 1170.9587
+| Reward: 11296.1694 | Episode: 197 | Qmax: 1186.8185
+| Reward: 11295.6826 | Episode: 198 | Qmax: 1203.1350
+| Reward: 11296.0202 | Episode: 199 | Qmax: 1220.7924
+saving weights
+Plotting an new testing environment
