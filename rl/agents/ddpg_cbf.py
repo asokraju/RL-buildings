@@ -292,7 +292,7 @@ class ActorNetwork_rnn(object):
     def create_actor_network(self):
         inputs = Input(shape = (self.time_steps, self.state_dim), batch_size = None, name = "actor_input_state")
         w_init = tf.random_uniform_initializer(minval=-0.03, maxval=0.03, seed=None)
-        #conv = layers.Conv1D(filters=16, kernel_size = 2, activation='relu')(inputs)
+        conv = layers.Conv1D(filters=16, kernel_size = 2, activation='relu')(inputs)
         #maxpool = layers.MaxPooling1D(pool_size=2)(conv)
         lstm_net = layers.GRU(
             units= self.params_rnn, 
@@ -300,7 +300,7 @@ class ActorNetwork_rnn(object):
             return_state=False, 
             name = 'actor_rnn', 
             #kernel_initializer = w_init
-            )(inputs)
+            )(conv)
 
         net = layers.Dense(self.params_l1, name = 'actor_dense_1', kernel_initializer = w_init)(lstm_net)
         net = layers.BatchNormalization()(net)
@@ -370,9 +370,9 @@ class CriticNetwork_rnn(object):
         w_init = tf.random_uniform_initializer(minval=-0.03, maxval=0.03, seed=None)
 
         #LSTM layer
-        #conv = layers.Conv1D(filters=16, kernel_size = 2, activation='relu')(inputs_state)
+        conv = layers.Conv1D(filters=16, kernel_size = 2, activation='relu')(inputs_state)
         #maxpool = layers.MaxPooling1D(pool_size=2)(conv)
-        lstm_net = layers.GRU(units = self.params_rnn, return_sequences=False, return_state=False)(inputs_state)
+        lstm_net = layers.GRU(units = self.params_rnn, return_sequences=False, return_state=False)(conv)
         
         #first hidden layer
         net_state = layers.Dense(self.params_l1, name = 'critic_dense_1', kernel_initializer = w_init)(lstm_net)
@@ -537,17 +537,13 @@ def train_rnn(env, test_env, args, actor, critic, actor_noise, reward_result, sc
 ##----------------------------------------------------------------------------------------------------------------------------
 ##-------------------------------------------With CBF---------------------------------------------------
 ##----------------------------------------------------------------------------------------------------------------------------
-def train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result, scaler, replay_buffer, true_states, CBF_rl, T_min = 24, T_max = 26, u_min = 23, u_max =26):
+def train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result, scaler, replay_buffer, true_states, CBF_rl):
     print('running - train_rnn_cbf')
     writer = tf.summary.create_file_writer(logdir = args['summary_dir'])
     actor.update_target_network()
     critic.update_target_network()
     time_steps = args['time_steps']
-    min_temp = T_min
-    max_temp = T_max
-    u_min = u_min
-    u_max = u_max
-    delta_u = u_max - u_min
+    delta_u = args['T_set_max_min'][1] - args['T_set_max_min'][0]
 
     paths = list()
 
@@ -570,12 +566,12 @@ def train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result
             #sampling a random input (-1,1)
             a_rl = env.action_space.sample()
             #rescaling the input to (u_min, u_max)
-            T_rl = (a_rl + 1)*(delta_u/2) + u_min
+            T_rl = (a_rl + 1)*(delta_u/2) + args['T_set_max_min'][0]
             #Projection
-            delta_cbf = CBF_rl(env, T_rl[0], T_min =min_temp, T_max=max_temp, eta_1 = 0.5, eta_2 = 0.5)
+            delta_cbf = CBF_rl(env, T_rl[0], T_min =args['T_max_min'][0], T_max=args['T_max_min'][1], eta_1 = 0.5, eta_2 = 0.5)
             T_cbf = T_rl + delta_cbf
             #rescaling the input to (-1, 1)
-            a_cbf = (T_cbf - u_min)*(2/delta_u) - 1
+            a_cbf = (T_cbf - args['T_set_max_min'][0])*(2/delta_u) - 1
 
             #next step
             s, _,_,_ = env.step(a_cbf)
@@ -596,12 +592,12 @@ def train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result
             # action should be inbetween -1 and 1
             #a_rl = np.clip(a_rl, -args['action_bound'], args['action_bound'])[0]
             #rescaling the input to (u_min, u_max)
-            T_rl = (a_rl.numpy()[0] + 1)*(delta_u/2) + u_min
+            T_rl = (a_rl.numpy()[0] + 1)*(delta_u/2) + args['T_set_max_min'][0]
             #Projection
-            delta_cbf = CBF_rl(env, T_rl[0], T_min =min_temp, T_max=max_temp, eta_1 = 0.5, eta_2 = 0.5)
+            delta_cbf = CBF_rl(env, T_rl[0], T_min =args['T_max_min'][0], T_max=args['T_max_min'][1], eta_1 = 0.5, eta_2 = 0.5)
             T_cbf = T_rl + delta_cbf
             #rescaling the input to (-1, 1)
-            a_cbf = (T_cbf - u_min)*(2/delta_u) - 1
+            a_cbf = (T_cbf - args['T_set_max_min'][0])*(2/delta_u) - 1
             #print('a_rl = {}, T_rl = {}, delta_cbf = {}, T_cbf ={}, a_cbf = {}'.format(a_rl,T_rl,delta_cbf,T_cbf,a_cbf))
             s2, r, terminal, info = env.step(a_cbf)
             s2_scaled = np.float32((s2 - mean) * var)

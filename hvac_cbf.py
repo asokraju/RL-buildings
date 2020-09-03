@@ -29,8 +29,8 @@ def main(args, reward_result):
     d = np.loadtxt(path+'/data/d.txt')
     true_states = np.loadtxt(path+'/data/states.txt')
     #initalizing environment
-    test_env = two_zone_HVAC(d = d, A = A)
-    env = two_zone_HVAC(d = d, A = A)
+    test_env = two_zone_HVAC(d = d, A = A, T_set_max_min = args['T_set_max_min'])
+    env = two_zone_HVAC(d = d, A = A, T_set_max_min = args['T_set_max_min'])
     print('starting the scaling')
     test_s = test_env.reset()
     test_obs=[]
@@ -39,14 +39,11 @@ def main(args, reward_result):
     for _ in range(test_episodes):
         for _ in range(test_steps):
             T_rl = env.action_space.sample()
-            #delta_cbf = CBF_rl(env, T_rl[0], T_min =22, T_max=23, eta_1 = 0.5, eta_2 = 0.5)
-            #a_cbf = np.array(T_rl + delta_cbf, dtype="float32")
-            #print('main', a_cbf)
             s, _,_,_ = test_env.step(T_rl)
             test_obs.append(s)
         test_env.reset()
     scaler = Scaler(2)
-    scaler.update(np.concatenate(test_obs).reshape((test_steps*test_episodes,env.observation_space.shape[0])))
+    scaler.update(np.concatenate(test_obs).reshape((test_steps*test_episodes,args['state_dim'])))
     var, mean = scaler.get()
     print('finished the scaling')
     print(var, mean)
@@ -107,7 +104,7 @@ def main(args, reward_result):
     print(actor.actor_model.summary())
     print(critic.critic_model.summary())
     print('starting the simulation')
-    paths, reward_result = train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result, scaler, replay_buffer, true_states, CBF_rl, T_min = 24, T_max = 26, u_min = 23, u_max =26)
+    paths, reward_result = train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result, scaler, replay_buffer, true_states, CBF_rl)
     print('saving weights')
     # Saving the weights
     if args['save_model']:
@@ -137,9 +134,7 @@ def main(args, reward_result):
 
     obs_scaled, obs, actions = [], [], []
     test_s = test_env.reset()
-    u_min = 23
-    u_max =26
-    delta_u = u_max-u_min
+    delta_u = args['T_set_max_min'][1]-args['T_set_max_min'][0]
     for _ in range(args['time_steps']-1):
         s_scaled = np.float32((test_s - mean) * var)
         obs_scaled.append(s_scaled)
@@ -147,12 +142,12 @@ def main(args, reward_result):
 
         a_rl = test_env.action_space.sample()
         #rescaling the input to (u_min, u_max)
-        T_rl = (a_rl + 1)*(delta_u/2) + u_min
+        T_rl = (a_rl + 1)*(delta_u/2) + args['T_set_max_min'][0]
         #Projection
-        delta_cbf = CBF_rl(test_env, T_rl[0], T_min =22, T_max=23, eta_1 = 0.5, eta_2 = 0.5)
+        delta_cbf = CBF_rl(test_env, T_rl[0], T_min =args['T_max_min'][0], T_max=args['T_max_min'][1], eta_1 = 0.5, eta_2 = 0.5)
         T_cbf = T_rl + delta_cbf
         #rescaling the input to (-1, 1)
-        a_cbf = (T_cbf - u_min)*(2/delta_u) - 1
+        a_cbf = (T_cbf - args['T_set_max_min'][0])*(2/delta_u) - 1
         #print('a_rl = {}, T_rl = {}, delta_cbf = {}, T_cbf ={}, a_cbf = {}'.format(a_rl,T_rl,delta_cbf,T_cbf,a_cbf))
         test_s, r, terminal, info = test_env.step(a_cbf)
         #actions.append(a_cbf)
@@ -164,11 +159,11 @@ def main(args, reward_result):
     for _ in range(test_env.total_no_of_steps-args['time_steps']+1):
         S_0 = obs_scaled[-args['time_steps']:]
         a_rl = actor.predict(np.reshape(S_0, (1, args['time_steps'], args['state_dim'])))
-        T_rl = (a_rl + 1)*(delta_u/2) + u_min
-        delta_cbf = CBF_rl(test_env, T_rl[0], T_min =22, T_max=23, eta_1 = 0.5, eta_2 = 0.5)
+        T_rl = (a_rl + 1)*(delta_u/2) + args['T_set_max_min'][0]
+        delta_cbf = CBF_rl(test_env, T_rl[0], T_min =args['T_max_min'][0], T_max=args['T_set_max_min'][1], eta_1 = 0.5, eta_2 = 0.5)
         T_cbf = T_rl + delta_cbf
         #rescaling the input to (-1, 1)
-        a_cbf = (T_cbf - u_min)*(2/delta_u) - 1
+        a_cbf = (T_cbf - args['T_set_max_min'][0])*(2/delta_u) - 1
         #delta_cbf = CBF_rl(test_env, T_rl[0], T_min =22, T_max=23, eta_1 = 0.5, eta_2 = 0.5)
         #a_cbf = np.array(T_rl + delta_cbf, dtype="float32")
 
@@ -180,6 +175,8 @@ def main(args, reward_result):
     savefig_filename = args['summary_dir']+'/results/results_plot_cbf.png'
     #test_env.plot(savefig_filename=savefig_filename)
     test_env.plot(true_states, plot_original=False, savefig_filename = savefig_filename)
+    savefig_filename = args['summary_dir']+'/results/results_plot_zoomed_cbf.png'
+    test_env.plot(true_states, plot_original=False,start = 0, end = 24, savefig_filename = savefig_filename)
     savemat(args['summary_dir'] + '/results/data.mat',
             dict(data=paths, reward=reward_result))
 
@@ -208,7 +205,7 @@ if __name__ == '__main__':
     
     #agent params
     parser.add_argument('--buffer_size', help='replay buffer size', type = int, default=1000000)
-    parser.add_argument('--max_episodes', help='max number of episodes', type = int, default=1)
+    parser.add_argument('--max_episodes', help='max number of episodes', type = int, default=200)
     parser.add_argument('--max_episode_len', help='Number of steps per epsiode', type = int, default=env.total_no_of_steps)
     parser.add_argument('--mini_batch_size', help='sampling batch size',type =int, default=300)
     parser.add_argument('--actor_lr', help='actor network learning rate',type =float, default=0.0001)
@@ -222,19 +219,23 @@ if __name__ == '__main__':
     parser.add_argument('--action_dim', help='action space dimension', type = int, default=action_dim)
     parser.add_argument('--action_bound', help='upper and lower bound of the actions', type = float, default=action_bound)
     parser.add_argument('--discretization_time', help='discretization time used for the environment ', type = float, default=1e-3)
+    parser.add_argument('--T_set_max_min', help='Min and Max of T_set  (input) ', type = lambda s: [float(item) for item in s.split(',')], default=[23., 26.])
+    parser.add_argument('--T_max_min', help='Min and Max of T (state) ', type = lambda s: [float(item) for item in s.split(',')], default=[22., 23.])
 
     #Network parameters
     parser.add_argument('--time_steps', help='Number of time-steps for rnn (LSTM)', type = int, default=6)
     parser.add_argument('--actor_rnn', help='actor network rnn paramerters', type = int, default=10)
-    parser.add_argument('--actor_l1', help='actor network layer 1 parameters', type = int, default=30)
+    parser.add_argument('--actor_l1', help='actor network layer 1 parameters', type = int, default=50)
     parser.add_argument('--actor_l2', help='actor network layer 2 parameters', type = int, default=40)
     parser.add_argument('--critic_rnn', help='critic network rnn parameters', type = int, default=10)
-    parser.add_argument('--critic_l1', help='actor network layer 1 parameters', type = int, default=30)
+    parser.add_argument('--critic_l1', help='actor network layer 1 parameters', type = int, default=50)
     parser.add_argument('--critic_l2', help='actor network layer 2 parameters', type = int, default=20)
     parser.add_argument('--tau', help='target network learning rate', type = float, default=0.001)
     
     args = vars(parser.parse_args())
-    
+    for key, values in args.items():
+        print(key, values)
+
     pp.pprint(args)
 
     reward_result = np.zeros(2500)

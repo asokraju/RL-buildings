@@ -12,7 +12,7 @@ class two_zone_HVAC(gym.Env):
     """
     metadata = {'render.modes': ['console']}
 
-    def __init__(self, d, A = None, COP =4):
+    def __init__(self, d, A = None, COP =4, T_set_max_min = [23., 26.]):
         super(two_zone_HVAC, self).__init__()
 
         #parameters
@@ -26,7 +26,7 @@ class two_zone_HVAC(gym.Env):
         #the steady-state equilibrium of the system is
         self.COP = COP
         self.d=d
-        
+        self.T_set_max_min = T_set_max_min
         #The control action is
         #self.action_space = spaces.Box(low=23, high=26, shape=(1,), dtype=np.float32)
         self.action_space = spaces.Box(low=-1, high=1, shape=(1,), dtype=np.float32)
@@ -65,7 +65,8 @@ class two_zone_HVAC(gym.Env):
         return self.state
     
     def step(self, action):
-        T_set  =  (action[0] + 1)*(3/2) +23
+        delta_u = self.T_set_max_min[1] - self.T_set_max_min[0]
+        T_set  =  (action[0] + 1)*(delta_u/2) +self.T_set_max_min[0]
         T = self.state[0]
         Q = self.state[1]
         state = np.append([T, Q, T_set], self.d[self.count_steps,1:]).T
@@ -84,9 +85,10 @@ class two_zone_HVAC(gym.Env):
         return self.state, reward, done, {}
     
     def net_state(self):
-        if self.count_steps==0:
-            print("run env.step before using net_state method")
-        return np.append([T, Q], self.d[self.count_steps -1,1:]).T
+        if self.count_steps<self.total_no_of_steps:
+            return np.append([self.state[0], self.state[1]], self.d[self.count_steps,1:]).T
+        else:
+            return np.append([self.state[0], self.state[1]], self.d[self.count_steps-1,1:]).T
 
 
     def close(self):
