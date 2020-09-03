@@ -34,7 +34,7 @@ def main(args, reward_result):
     test_s = test_env.reset()
     test_obs=[]
     test_steps = env.total_no_of_steps-1
-    test_episodes = 20
+    test_episodes = 200
     for _ in range(test_episodes):
         for _ in range(test_steps):
             u = env.action_space.sample()

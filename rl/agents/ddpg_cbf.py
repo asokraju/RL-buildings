@@ -436,7 +436,8 @@ def train_rnn(env, test_env, args, actor, critic, actor_noise, reward_result, sc
 
     for i in range(args['max_episodes']):
         test_env.reset()
-        s = env.reset()
+        env.reset()
+        s = env.net_state()
         ep_reward = 0
         ep_ave_max_q = 0
         obs, obs_scaled, actions, rewards = [], [], [], []
@@ -450,7 +451,8 @@ def train_rnn(env, test_env, args, actor, critic, actor_noise, reward_result, sc
             s_scaled = np.float32((s - mean) * var)
             obs_scaled.append(s_scaled)
             obs.append(s)
-            s, r, terminal, info = env.step(np.array(env.action_space.sample(), dtype="float32"))
+            _, r, terminal, info = env.step(np.array(env.action_space.sample(), dtype="float32"))
+            s = env.net_state()
             actions.append(np.array(env.action_space.sample()))
 
         s_scaled = np.float32((s - mean) * var)
@@ -470,7 +472,8 @@ def train_rnn(env, test_env, args, actor, critic, actor_noise, reward_result, sc
             #print(a)
             a = np.clip(a, -args['action_bound'], args['action_bound'])
 
-            s2, r, terminal, info = env.step(a[0])
+            _, r, terminal, info = env.step(a[0])
+            s2 = env.net_state()
             s2_scaled = np.float32((s2 - mean) * var)
 
             #noise annealing
@@ -517,7 +520,7 @@ def train_rnn(env, test_env, args, actor, critic, actor_noise, reward_result, sc
                 print('| Reward: {:.4f} | Episode: {:d} | Qmax: {:.4f}'.format((ep_reward), i, (ep_ave_max_q / float(j))))
                 reward_result[i] = ep_reward
                 path = {
-                    "Observation":np.concatenate(obs).reshape((args['max_episode_len']+1,2)), 
+                    "Observation":np.concatenate(obs).reshape((args['max_episode_len']+1,6)), 
                     "Action":np.concatenate(actions), 
                     "Reward":np.asarray(rewards)
                     }
@@ -553,7 +556,8 @@ def train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result
 
     for i in range(args['max_episodes']):
         test_env.reset()
-        s = env.reset()
+        env.reset()
+        s = env.net_state()
         ep_reward = 0
         ep_ave_max_q = 0
         obs, obs_scaled, actions, rewards = [], [], [], []
@@ -578,7 +582,8 @@ def train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result
             a_cbf = (T_cbf - u_min)*(2/delta_u) - 1
 
             #next step
-            s, _,_,_ = env.step(a_cbf)
+            _, _,_,_ = env.step(a_cbf)
+            s = env.net_state()
             actions.append(T_cbf)
 
         s_scaled = np.float32((s - mean) * var)
@@ -603,7 +608,8 @@ def train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result
             #rescaling the input to (-1, 1)
             a_cbf = (T_cbf - u_min)*(2/delta_u) - 1
             #print('a_rl = {}, T_rl = {}, delta_cbf = {}, T_cbf ={}, a_cbf = {}'.format(a_rl,T_rl,delta_cbf,T_cbf,a_cbf))
-            s2, r, terminal, info = env.step(a_cbf)
+            _, r, terminal, info = env.step(a_cbf)
+            s2 = env.net_state()
             s2_scaled = np.float32((s2 - mean) * var)
 
             #noise annealing
@@ -651,7 +657,7 @@ def train_rnn_cbf(env, test_env, args, actor, critic, actor_noise, reward_result
                 print('| Reward: {:.4f} | Episode: {:d} | Qmax: {:.4f}'.format((ep_reward), i, (ep_ave_max_q / float(j))))
                 reward_result[i] = ep_reward
                 path = {
-                    "Observation":np.concatenate(obs).reshape((args['max_episode_len']+1,2)), 
+                    "Observation":np.concatenate(obs).reshape((args['max_episode_len']+1,6)), 
                     "Action":np.concatenate(actions), 
                     "Reward":np.asarray(rewards)
                     }

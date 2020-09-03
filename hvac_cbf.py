@@ -32,7 +32,8 @@ def main(args, reward_result):
     test_env = two_zone_HVAC(d = d, A = A)
     env = two_zone_HVAC(d = d, A = A)
     print('starting the scaling')
-    test_s = test_env.reset()
+    test_env.reset()
+    test_s = test_env.net_state()
     test_obs=[]
     test_steps = env.total_no_of_steps-1
     test_episodes = 20
@@ -42,11 +43,12 @@ def main(args, reward_result):
             #delta_cbf = CBF_rl(env, T_rl[0], T_min =22, T_max=23, eta_1 = 0.5, eta_2 = 0.5)
             #a_cbf = np.array(T_rl + delta_cbf, dtype="float32")
             #print('main', a_cbf)
-            s, _,_,_ = test_env.step(T_rl)
+            _, _,_,_ = test_env.step(T_rl)
+            s = test_env.net_state()
             test_obs.append(s)
         test_env.reset()
-    scaler = Scaler(2)
-    scaler.update(np.concatenate(test_obs).reshape((test_steps*test_episodes,env.observation_space.shape[0])))
+    scaler = Scaler(6)
+    scaler.update(np.concatenate(test_obs).reshape((test_steps*test_episodes,6)))
     var, mean = scaler.get()
     print('finished the scaling')
     print(var, mean)
@@ -136,7 +138,8 @@ def main(args, reward_result):
         var, mean = 1.0, 0.0
 
     obs_scaled, obs, actions = [], [], []
-    test_s = test_env.reset()
+    test_env.reset()
+    test_s = test_env.net_state()
     u_min = 23
     u_max =26
     delta_u = u_max-u_min
@@ -154,7 +157,8 @@ def main(args, reward_result):
         #rescaling the input to (-1, 1)
         a_cbf = (T_cbf - u_min)*(2/delta_u) - 1
         #print('a_rl = {}, T_rl = {}, delta_cbf = {}, T_cbf ={}, a_cbf = {}'.format(a_rl,T_rl,delta_cbf,T_cbf,a_cbf))
-        test_s, r, terminal, info = test_env.step(a_cbf)
+        _, r, terminal, info = test_env.step(a_cbf)
+        test_s = test_env.net_state()
         #actions.append(a_cbf)
     
     s_scaled = np.float32((test_s - mean) * var)
@@ -172,7 +176,8 @@ def main(args, reward_result):
         #delta_cbf = CBF_rl(test_env, T_rl[0], T_min =22, T_max=23, eta_1 = 0.5, eta_2 = 0.5)
         #a_cbf = np.array(T_rl + delta_cbf, dtype="float32")
 
-        test_s, r, terminal, info = test_env.step(a_cbf)
+        _, r, terminal, info = test_env.step(a_cbf)
+        test_s = test_env.net_state()
         s2_scaled = np.float32((test_s - mean) * var)
         obs_scaled.append(s2_scaled)
         if terminal:
@@ -193,7 +198,8 @@ if __name__ == '__main__':
     A = np.loadtxt(path+'/data/A.txt')
     d = np.loadtxt(path+'/data/d.txt')
     env = two_zone_HVAC(A=A, d=d)
-    state_dim = env.observation_space.shape[0]
+    #state_dim = env.observation_space.shape[0]
+    state_dim = np.shape(env.net_state())[0]
     action_dim = env.action_space.shape[0]
     action_bound = env.action_space.high
     #--------------------------------------------------------------------
@@ -208,7 +214,7 @@ if __name__ == '__main__':
     
     #agent params
     parser.add_argument('--buffer_size', help='replay buffer size', type = int, default=1000000)
-    parser.add_argument('--max_episodes', help='max number of episodes', type = int, default=1)
+    parser.add_argument('--max_episodes', help='max number of episodes', type = int, default=100)
     parser.add_argument('--max_episode_len', help='Number of steps per epsiode', type = int, default=env.total_no_of_steps)
     parser.add_argument('--mini_batch_size', help='sampling batch size',type =int, default=300)
     parser.add_argument('--actor_lr', help='actor network learning rate',type =float, default=0.0001)

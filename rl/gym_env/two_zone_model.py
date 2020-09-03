@@ -84,9 +84,12 @@ class two_zone_HVAC(gym.Env):
         return self.state, reward, done, {}
     
     def net_state(self):
-        if self.count_steps==0:
-            print("run env.step before using net_state method")
-        return np.append([T, Q], self.d[self.count_steps -1,1:]).T
+        # if self.count_steps==0:
+        #     print("run env.step before using net_state method")
+        if self.count_steps<=self.total_no_of_steps:
+            return np.append([self.state[0], self.state[1]], self.d[self.count_steps,1:]).T
+        else:
+            return np.append([self.state[0], self.state[1]], self.d[self.count_steps-1,1:]).T
 
 
     def close(self):
