@@ -1,0 +1,60 @@
+summary_dir /afs/crc.nd.edu/user/k/kkosaraj/GITHUB_BUILD_1/my_scripts/test_name=dcbf_2/gamma=0.99/time_steps=1
+use_gpu True
+save_model True
+load_model False
+random_seed 1754
+buffer_size 1000000
+max_episodes 200
+max_episode_len 1464
+mini_batch_size 300
+actor_lr 0.0001
+critic_lr 0.001
+gamma 0.99
+noise_var 0.0925
+scaling True
+state_dim 2
+action_dim 1
+action_bound [1.]
+discretization_time 0.001
+T_set_max_min [23.0, 26.0]
+T_max_min [22.0, 23.0]
+time_steps 1
+actor_rnn 10
+actor_l1 50
+actor_l2 40
+critic_rnn 10
+critic_l1 50
+critic_l2 20
+tau 0.001
+{'T_max_min': [22.0, 23.0],
+ 'T_set_max_min': [23.0, 26.0],
+ 'action_bound': array([1.], dtype=float32),
+ 'action_dim': 1,
+ 'actor_l1': 50,
+ 'actor_l2': 40,
+ 'actor_lr': 0.0001,
+ 'actor_rnn': 10,
+ 'buffer_size': 1000000,
+ 'critic_l1': 50,
+ 'critic_l2': 20,
+ 'critic_lr': 0.001,
+ 'critic_rnn': 10,
+ 'discretization_time': 0.001,
+ 'gamma': 0.99,
+ 'load_model': False,
+ 'max_episode_len': 1464,
+ 'max_episodes': 200,
+ 'mini_batch_size': 300,
+ 'noise_var': 0.0925,
+ 'random_seed': 1754,
+ 'save_model': True,
+ 'scaling': True,
+ 'state_dim': 2,
+ 'summary_dir': '/afs/crc.nd.edu/user/k/kkosaraj/GITHUB_BUILD_1/my_scripts/test_name=dcbf_2/gamma=0.99/time_steps=1',
+ 'tau': 0.001,
+ 'time_steps': 1,
+ 'use_gpu': True}
+starting the scaling
+finished the scaling
+[0.48068169 0.028193  ] [ 23.99452677 -28.57823951]
+initalizing the actor and critic func
