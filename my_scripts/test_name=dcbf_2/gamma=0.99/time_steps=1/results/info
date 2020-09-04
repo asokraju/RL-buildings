@@ -82,3 +82,86 @@ Traceback (most recent call last):
   File "/afs/crc.nd.edu/user/k/kkosaraj/.conda/envs/tf_gpu_krishna/lib/python3.8/site-packages/tensorflow/python/framework/ops.py", line 1657, in _create_c_op
     raise ValueError(str(e))
 ValueError: Negative dimension size caused by subtracting 2 from 1 for '{{node conv1d/conv1d}} = Conv2D[T=DT_FLOAT, data_format="NHWC", dilations=[1, 1, 1, 1], explicit_paddings=[], padding="VALID", strides=[1, 1, 1, 1], use_cudnn_on_gpu=true](conv1d/conv1d/ExpandDims, conv1d/conv1d/ExpandDims_1)' with input shapes: [?,1,1,2], [1,2,2,16].
+2020-09-03 19:02:58.276695: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcuda.so.1
+2020-09-03 19:02:59.037498: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1561] Found device 0 with properties: 
+pciBusID: 0000:82:00.0 name: GeForce GTX 1080 Ti computeCapability: 6.1
+coreClock: 1.582GHz coreCount: 28 deviceMemorySize: 10.92GiB deviceMemoryBandwidth: 451.17GiB/s
+2020-09-03 19:02:59.038943: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudart.so.10.1
+2020-09-03 19:02:59.050430: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcublas.so.10
+2020-09-03 19:02:59.057662: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcufft.so.10
+2020-09-03 19:02:59.059547: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcurand.so.10
+2020-09-03 19:02:59.070341: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusolver.so.10
+2020-09-03 19:02:59.073514: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusparse.so.10
+2020-09-03 19:02:59.092752: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudnn.so.7
+2020-09-03 19:02:59.095160: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1703] Adding visible gpu devices: 0
+2020-09-03 19:03:01.716862: I tensorflow/core/platform/cpu_feature_guard.cc:143] Your CPU supports instructions that this TensorFlow binary was not compiled to use: SSE4.1 SSE4.2 AVX AVX2 FMA
+2020-09-03 19:03:01.731557: I tensorflow/core/platform/profile_utils/cpu_utils.cc:102] CPU Frequency: 2199865000 Hz
+2020-09-03 19:03:01.733060: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x564f34e68050 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2020-09-03 19:03:01.733098: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2020-09-03 19:03:01.739286: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1561] Found device 0 with properties: 
+pciBusID: 0000:82:00.0 name: GeForce GTX 1080 Ti computeCapability: 6.1
+coreClock: 1.582GHz coreCount: 28 deviceMemorySize: 10.92GiB deviceMemoryBandwidth: 451.17GiB/s
+2020-09-03 19:03:01.739389: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudart.so.10.1
+2020-09-03 19:03:01.739427: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcublas.so.10
+2020-09-03 19:03:01.739479: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcufft.so.10
+2020-09-03 19:03:01.739507: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcurand.so.10
+2020-09-03 19:03:01.739531: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusolver.so.10
+2020-09-03 19:03:01.739557: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusparse.so.10
+2020-09-03 19:03:01.739583: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudnn.so.7
+2020-09-03 19:03:01.741493: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1703] Adding visible gpu devices: 0
+2020-09-03 19:03:01.741639: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudart.so.10.1
+2020-09-03 19:03:01.887932: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1102] Device interconnect StreamExecutor with strength 1 edge matrix:
+2020-09-03 19:03:01.888034: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1108]      0 
+2020-09-03 19:03:01.888070: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1121] 0:   N 
+2020-09-03 19:03:01.898048: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1247] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 10371 MB memory) -> physical GPU (device: 0, name: GeForce GTX 1080 Ti, pci bus id: 0000:82:00.0, compute capability: 6.1)
+2020-09-03 19:03:01.903740: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x564f35500690 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+2020-09-03 19:03:01.903796: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): GeForce GTX 1080 Ti, Compute Capability 6.1
+/afs/crc.nd.edu/user/k/kkosaraj/.conda/envs/tf_gpu_krishna/lib/python3.8/site-packages/gym/logger.py:30: UserWarning: [33mWARN: Box bound precision lowered by casting to float32[0m
+  warnings.warn(colorize('%s: %s'%('WARN', msg % args), 'yellow'))
+Traceback (most recent call last):
+  File "/afs/crc.nd.edu/user/k/kkosaraj/.conda/envs/tf_gpu_krishna/lib/python3.8/site-packages/tensorflow/python/framework/ops.py", line 1654, in _create_c_op
+    c_op = pywrap_tf_session.TF_FinishOperation(op_desc)
+tensorflow.python.framework.errors_impl.InvalidArgumentError: Negative dimension size caused by subtracting 2 from 1 for '{{node conv1d/conv1d}} = Conv2D[T=DT_FLOAT, data_format="NHWC", dilations=[1, 1, 1, 1], explicit_paddings=[], padding="VALID", strides=[1, 1, 1, 1], use_cudnn_on_gpu=true](conv1d/conv1d/ExpandDims, conv1d/conv1d/ExpandDims_1)' with input shapes: [?,1,1,2], [1,2,2,16].
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/afs/crc.nd.edu/user/k/kkosaraj/GITHUB_BUILD_1/hvac_cbf.py", line 242, in <module>
+    [paths, reward_result] = main(args, reward_result)
+  File "/afs/crc.nd.edu/user/k/kkosaraj/GITHUB_BUILD_1/hvac_cbf.py", line 61, in main
+    actor = ActorNetwork_rnn(
+  File "/afs/crc.nd.edu/user/k/kkosaraj/GITHUB_BUILD_1/rl/agents/ddpg_cbf.py", line 278, in __init__
+    self.inputs, self.out, self.scaled_out = self.create_actor_network()
+  File "/afs/crc.nd.edu/user/k/kkosaraj/GITHUB_BUILD_1/rl/agents/ddpg_cbf.py", line 295, in create_actor_network
+    conv = layers.Conv1D(filters=16, kernel_size = 2, activation='relu')(inputs)
+  File "/afs/crc.nd.edu/user/k/kkosaraj/.conda/envs/tf_gpu_krishna/lib/python3.8/site-packages/tensorflow/python/keras/engine/base_layer.py", line 922, in __call__
+    outputs = call_fn(cast_inputs, *args, **kwargs)
+  File "/afs/crc.nd.edu/user/k/kkosaraj/.conda/envs/tf_gpu_krishna/lib/python3.8/site-packages/tensorflow/python/keras/layers/convolutional.py", line 207, in call
+    outputs = self._convolution_op(inputs, self.kernel)
+  File "/afs/crc.nd.edu/user/k/kkosaraj/.conda/envs/tf_gpu_krishna/lib/python3.8/site-packages/tensorflow/python/ops/nn_ops.py", line 1106, in __call__
+    return self.conv_op(inp, filter)
+  File "/afs/crc.nd.edu/user/k/kkosaraj/.conda/envs/tf_gpu_krishna/lib/python3.8/site-packages/tensorflow/python/ops/nn_ops.py", line 638, in __call__
+    return self.call(inp, filter)
+  File "/afs/crc.nd.edu/user/k/kkosaraj/.conda/envs/tf_gpu_krishna/lib/python3.8/site-packages/tensorflow/python/ops/nn_ops.py", line 231, in __call__
+    return self.conv_op(
+  File "/afs/crc.nd.edu/user/k/kkosaraj/.conda/envs/tf_gpu_krishna/lib/python3.8/site-packages/tensorflow/python/ops/nn_ops.py", line 220, in _conv1d
+    return conv1d(
+  File "/afs/crc.nd.edu/user/k/kkosaraj/.conda/envs/tf_gpu_krishna/lib/python3.8/site-packages/tensorflow/python/util/deprecation.py", line 574, in new_func
+    return func(*args, **kwargs)
+  File "/afs/crc.nd.edu/user/k/kkosaraj/.conda/envs/tf_gpu_krishna/lib/python3.8/site-packages/tensorflow/python/util/deprecation.py", line 574, in new_func
+    return func(*args, **kwargs)
+  File "/afs/crc.nd.edu/user/k/kkosaraj/.conda/envs/tf_gpu_krishna/lib/python3.8/site-packages/tensorflow/python/ops/nn_ops.py", line 1655, in conv1d
+    result = gen_nn_ops.conv2d(
+  File "/afs/crc.nd.edu/user/k/kkosaraj/.conda/envs/tf_gpu_krishna/lib/python3.8/site-packages/tensorflow/python/ops/gen_nn_ops.py", line 965, in conv2d
+    _, _, _op, _outputs = _op_def_library._apply_op_helper(
+  File "/afs/crc.nd.edu/user/k/kkosaraj/.conda/envs/tf_gpu_krishna/lib/python3.8/site-packages/tensorflow/python/framework/op_def_library.py", line 742, in _apply_op_helper
+    op = g._create_op_internal(op_type_name, inputs, dtypes=None,
+  File "/afs/crc.nd.edu/user/k/kkosaraj/.conda/envs/tf_gpu_krishna/lib/python3.8/site-packages/tensorflow/python/framework/func_graph.py", line 593, in _create_op_internal
+    return super(FuncGraph, self)._create_op_internal(  # pylint: disable=protected-access
+  File "/afs/crc.nd.edu/user/k/kkosaraj/.conda/envs/tf_gpu_krishna/lib/python3.8/site-packages/tensorflow/python/framework/ops.py", line 3319, in _create_op_internal
+    ret = Operation(
+  File "/afs/crc.nd.edu/user/k/kkosaraj/.conda/envs/tf_gpu_krishna/lib/python3.8/site-packages/tensorflow/python/framework/ops.py", line 1816, in __init__
+    self._c_op = _create_c_op(self._graph, node_def, inputs,
+  File "/afs/crc.nd.edu/user/k/kkosaraj/.conda/envs/tf_gpu_krishna/lib/python3.8/site-packages/tensorflow/python/framework/ops.py", line 1657, in _create_c_op
+    raise ValueError(str(e))
+ValueError: Negative dimension size caused by subtracting 2 from 1 for '{{node conv1d/conv1d}} = Conv2D[T=DT_FLOAT, data_format="NHWC", dilations=[1, 1, 1, 1], explicit_paddings=[], padding="VALID", strides=[1, 1, 1, 1], use_cudnn_on_gpu=true](conv1d/conv1d/ExpandDims, conv1d/conv1d/ExpandDims_1)' with input shapes: [?,1,1,2], [1,2,2,16].

@@ -17,7 +17,7 @@ action_dim 1
 action_bound [1.]
 discretization_time 0.001
 T_set_max_min [23.0, 26.0]
-T_max_min [22.0, 23.0]
+T_max_min [22.0, 25.0]
 time_steps 1
 actor_rnn 10
 actor_l1 50
@@ -26,7 +26,7 @@ critic_rnn 10
 critic_l1 50
 critic_l2 20
 tau 0.001
-{'T_max_min': [22.0, 23.0],
+{'T_max_min': [22.0, 25.0],
  'T_set_max_min': [23.0, 26.0],
  'action_bound': array([1.], dtype=float32),
  'action_dim': 1,
@@ -56,5 +56,5 @@ tau 0.001
  'use_gpu': True}
 starting the scaling
 finished the scaling
-[0.48068169 0.028193  ] [ 23.99452677 -28.57823951]
+[0.47842762 0.02821909] [ 24.00356403 -28.56424162]
 initalizing the actor and critic func
